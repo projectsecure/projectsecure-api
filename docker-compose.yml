@@ -11,12 +11,19 @@ services:
     networks:
       - projectsecure
     volumes:
-      - /code
+      - .:/code
     ports:
       - "8000:8000"
     depends_on:
       - postgres
+    links:
+      - postgres
     command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      DJANGO_SETTINGS_MODULE: projectsecure.settings
+      JWT_SECRET_KEY: "A random key"
+      SECRET_KEY: "m5rk2z!-z4jx+)w@p!n_y338d56fgtjxob-j^goj7dt6k&f!!!"
+      DEBUG: "TRUE"
 
 networks:
   projectsecure:
