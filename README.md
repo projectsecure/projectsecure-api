@@ -15,5 +15,5 @@ $ docker-compose run web py.test
 
 ## TODO
 - Email confirmation
-- Email uniquess/required
+- Email unique/required
 - PEP8 testing
