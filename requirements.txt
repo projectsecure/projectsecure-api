@@ -6,4 +6,9 @@ django-extensions==1.7.4
 
 # Testing
 pytest-django==3.0.0
-flake8==3.0.4
+faker==0.7.3
+pytest-pep8==1.0.6
+pytest-flakes==1.0.1
+factory-boy
+fake-factory==0.5.9
+mock==2.0.0

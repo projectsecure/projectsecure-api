@@ -1,12 +1,22 @@
 from django.test import TestCase
-from django.core.urlresolvers import resolve
+from django.core.urlresolvers import reverse
 
 
-class UrlTestCase(TestCase):
+class TestUserUrls(TestCase):
+    def test_me_url(self):
+        url = reverse('user-me')
+        self.assertEqual(url, '/api/users/me/')
+
+
+class TestAuthUrls(TestCase):
     def test_login_url(self):
-        resolver = resolve('/users/login/')
-        assert resolver.view_name == 'rest_framework_jwt.views.ObtainJSONWebToken'
+        url = reverse('auth-jwt-obtain')
+        self.assertEqual(url, '/api/auth/login/')
 
-    def test_refresh_token_url(self):
-        resolver = resolve('/users/refresh_token/')
-        assert resolver.view_name == 'rest_framework_jwt.views.RefreshJSONWebToken'
+    def test_refresh_url(self):
+        url = reverse('auth-jwt-refresh')
+        self.assertEqual(url, '/api/auth/refresh/')
+
+    def test_verify_url(self):
+        url = reverse('auth-jwt-verify')
+        self.assertEqual(url, '/api/auth/verify/')
