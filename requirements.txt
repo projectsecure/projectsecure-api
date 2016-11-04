@@ -1,0 +1,6 @@
+Django==1.10.3
+djangorestframework==3.5.2
+
+# Testing
+pytest-django==3.0.0
+flake8==3.0.4

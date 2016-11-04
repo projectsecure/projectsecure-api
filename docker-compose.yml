@@ -1,0 +1,23 @@
+version: "2"
+
+services:
+  postgres:
+    image: postgres:9.4
+    networks:
+      - projectsecure
+
+  web:
+    build: ./
+    networks:
+      - projectsecure
+    volumes:
+      - /code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    command: python manage.py runserver 0.0.0.0:8000
+
+
+networks:
+  projectsecure:
