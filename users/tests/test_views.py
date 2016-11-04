@@ -20,15 +20,58 @@ def create_token(user_obj, expired=False):
 
 
 class TestUserViewSet(APITestCase):
-    def test_me(self):
+    def test_me_authenticated(self):
         user = UserFactory()
         self.client.force_authenticate(user=user)
         response = self.client.get(reverse('user-me'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'username': user.username, 'last_name': user.last_name,
-                                           'first_name': user.first_name})
+                                           'first_name': user.first_name, 'email': user.email})
 
+    def test_me_unauthenticated(self):
+        user = UserFactory()
+        response = self.client.get(reverse('user-me'))
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
+
+    def test_register_user_with_valid_data(self):
+        data = {
+            'username': 'anewuser',
+            'password': '1randompassword',
+            'email': 'anewuser@test.de',
+            'first_name': 'A New',
+            'last_name': 'User'
+        }
+        response = self.client.post(reverse('user-register'), data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data.pop('password')
+        self.assertEqual(response.json(), data)
+
+    def test_register_user_with_existing_data(self):
+        user = UserFactory()
+        data = {
+            'username': user.username,
+            'password': '1randompassword',
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        }
+        response = self.client.post(reverse('user-register'), data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(),
+                         {'username': ['A user with that username already exists.']})
+
+    def test_register_user_with_missing_data(self):
+        data = {}
+        response = self.client.post(reverse('user-register'), data=data)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(response.json(), {'password': ['This field is required.'],
+                                           'username': ['This field is required.']})
 
 class TestAuthObtainJWTView(APITestCase):
     def test_login_with_credentials(self):

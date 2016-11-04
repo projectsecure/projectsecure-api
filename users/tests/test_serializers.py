@@ -11,12 +11,13 @@ class TestUserSerializer(TestCase):
         """
         user = UserFactory()
         data = UserSerializer(user).data
-        keys = {'username', 'first_name', 'last_name'}
+        keys = {'username', 'first_name', 'last_name', 'email'}
 
         self.assertEqual(data.keys(), keys)
         self.assertEqual(data.pop('username'), user.username)
         self.assertEqual(data.pop('first_name'), user.first_name)
         self.assertEqual(data.pop('last_name'), user.last_name)
+        self.assertEqual(data.pop('email'), user.email)
 
         self.assertEqual(len(data), 0)
 
