@@ -1,6 +1,6 @@
 from django.conf.urls import url, include
 from rest_framework.routers import SimpleRouter
-from .views import UserViewSet
+from users.views import UserViewSet
 from rest_framework_jwt.views import obtain_jwt_token, verify_jwt_token, refresh_jwt_token
 
 router = SimpleRouter(trailing_slash=False)

@@ -11,6 +11,7 @@ class TestUserUrls(TestCase):
         url = reverse('user-register')
         self.assertEqual(url, '/api/users/register')
 
+
 class TestAuthUrls(TestCase):
     def test_login_url(self):
         url = reverse('auth-jwt-obtain')

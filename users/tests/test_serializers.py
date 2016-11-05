@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .factories import UserFactory
+from users.tests.factories import UserFactory
 from users.serializers import UserSerializer
 from django.contrib.auth.models import User
 
