@@ -18,31 +18,38 @@ class ChallengeStep(models.Model):
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
 
 
-class ActionMixin:
-    action_title = models.CharField(max_length=30, blank=False, null=False)
-
-
-class InputMixin:
-    input_title = models.CharField(max_length=30, blank=False, null=False)
-
-
 class TextChallengeStep(ChallengeStep):
     text = models.TextField()
 
 
-class ActionChallengeStep(ChallengeStep, ActionMixin):
-    pass
+class ActionChallengeStep(ChallengeStep):
+    action_title = models.CharField(max_length=30, blank=False, null=False)
 
 
-class TextInputChallengeStep(ChallengeStep, InputMixin, ActionMixin):
-   pass
+class TextInputChallengeStep(ChallengeStep):
+    action_title = models.CharField(max_length=30, blank=False, null=False)
+    input_title = models.CharField(max_length=30, blank=False, null=False)
 
 
 # Challenge Step State
 class ChallengeStepState(models.Model):
+    NOT_STARTED = "NOT_STARTED"
+    IN_PROGRESS = "IN_PROGRESS"
+    DONE = "DONE"
+    ERROR = "ERROR"
+
+    STATUS_CHOICES = (
+        (NOT_STARTED, 'Not started'),
+        (IN_PROGRESS, 'In progress'),
+        (DONE, 'Done'),
+        (ERROR, 'Error'),
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    challenge_step = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    challenge_step = models.ForeignKey(ChallengeStep, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(max_length=11, choices=STATUS_CHOICES, default=NOT_STARTED)
+    message = models.CharField(max_length=140, blank=True, null=False)
 
     class Meta:
         unique_together = ('challenge_step', 'user',) # TODO: test

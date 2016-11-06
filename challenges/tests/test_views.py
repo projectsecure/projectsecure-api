@@ -1,7 +1,9 @@
 from rest_framework.test import APITestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from challenges.tests.factories import ChallengeFactory, ChallengeStepFactory
+from challenges.tests.factories import ChallengeFactory, ChallengeStepFactory, \
+    ChallengeStepStateFactory
+from users.tests.factories import UserFactory
 
 
 class TestChallengeViewSet(APITestCase):
@@ -42,6 +44,8 @@ class TestChallengeStepViewSet(APITestCase):
              'title': challenge_step.title}])
 
     def test_retrieve_challenge_step_list_challenge_not_found(self):
+        user = UserFactory()
+        self.client.force_authenticate(user=user)
         response = self.client.get(reverse('challenges-step-list',
                                            kwargs={'parent_lookup_challenge_steps': 'random'}))
 
@@ -49,17 +53,28 @@ class TestChallengeStepViewSet(APITestCase):
         self.assertEqual(response.json(), [])
 
     def test_retrieve_challenge_steps_list(self):
-        challenge_step = ChallengeStepFactory()
+        state = ChallengeStepStateFactory()
+        user = state.user
+        challenge_step = state.challenge_step
+
+        self.client.force_authenticate(user=user)
         response = self.client.get(reverse('challenges-step-detail', kwargs={
             'parent_lookup_challenge_steps': str(challenge_step.challenge.id),
             'pk': str(challenge_step.id)}))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {'etc': challenge_step.etc, 'id': str(challenge_step.id),
-             'title': challenge_step.title})
+                                           'title': challenge_step.title,
+                                           'state': {'message': state.message,
+                                                     'status': state.status}})
+
+    def test_retrieve_challenge_steps_list_not_authenticated(self):
+        raise NotImplementedError
 
     def test_retrieve_challenge_steps_detail_not_found(self):
         challenge = ChallengeFactory()
+        user = UserFactory()
+        self.client.force_authenticate(user=user)
         response = self.client.get(reverse('challenges-step-detail',
                                            kwargs={'parent_lookup_challenge_steps': str(challenge.id),
                                                    'pk': 'random'}))
@@ -67,4 +82,6 @@ class TestChallengeStepViewSet(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.json(), {'detail': 'Not found.'})
 
-# TODO: Test get nested
+    def test_retrieve_challenge_steps_detail_not_authenticated(self):
+        raise NotImplementedError
+
