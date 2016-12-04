@@ -5,8 +5,6 @@ from rest_framework import status
 from .factories import UserFactory, DEFAULT_PASSWORD
 import datetime
 
-fake = FakeFactory.create()
-
 
 def create_token(user_obj, expired=False):
     from rest_framework_jwt.settings import api_settings
