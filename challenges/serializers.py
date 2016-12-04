@@ -1,34 +1,49 @@
 from rest_framework import serializers
-from challenges.models import Challenge, ChallengeStep, ChallengeStepState, ActionChallengeStep
+from challenges.models.challenge import Challenge
+
+
+class ChallengeMetaSerializer(serializers.HyperlinkedModelSerializer):
+    title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+    slug = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Challenge
+        fields = ('slug', 'title', 'description', 'steps')
+
+    def get_title(self, obj):
+        return obj[1].ChallengeMeta.title
+
+    def get_description(self, obj):
+        return obj[1].ChallengeMeta.description
+
+    def get_slug(self, obj):
+        return obj[0]
+
+    def get_steps(self, obj):
+        return obj[1].ChallengeMeta.steps
 
 
 class ChallengeSerializer(serializers.HyperlinkedModelSerializer):
+    title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+    slug = serializers.SerializerMethodField()
+    steps = serializers.SerializerMethodField()
+
     class Meta:
         model = Challenge
-        fields = ('id', 'title', 'description')
+        fields = ('title', 'description', 'steps', 'status', 'message')
 
+    def get_steps(self, obj):
+        return obj.ChallengeMeta.steps
 
-class ChallengeStepStateSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = ChallengeStepState
-        fields = ('status', 'message')
+    def get_title(self, obj):
+        return obj.ChallengeMeta.title
+
+    def get_description(self, obj):
+        return obj.ChallengeMeta.description
 
 
 class ChallengeStepSerializer(serializers.HyperlinkedModelSerializer):
-    state = serializers.SerializerMethodField('current_user_state')
-
-    class Meta:
-        model = ChallengeStep
-        fields = ('id', 'title', 'etc', 'state')
-
-    def current_user_state(self, obj):
-        user = self.context['request'].user
-        state = ChallengeStepState.objects.get(challenge_step=obj, user=user)
-        serializer = ChallengeStepStateSerializer(state)
-        return serializer.data
-
-
-class ActionChallengeStepSerializer(ChallengeStepSerializer):
-    class Meta:
-        model = ActionChallengeStep
-        fields = ChallengeStepSerializer.Meta.fields + ('type', 'action_title')
+    pass
+    # TODO: Return format: {'type': 'action', 'options': {}}

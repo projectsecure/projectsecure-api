@@ -1,8 +1,7 @@
 from rest_framework.test import APITestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from challenges.tests.factories import ChallengeFactory, ChallengeStepFactory, \
-    ChallengeStepStateFactory
+from challenges.tests.factories import ChallengeFactory
 from users.tests.factories import UserFactory
 
 
@@ -32,56 +31,11 @@ class TestChallengeViewSet(APITestCase):
              'title': challenge.title}])
 
 
-class TestChallengeStepViewSet(APITestCase):
-    def test_retrieve_challenge_steps_list(self):
-        challenge_step = ChallengeStepFactory()
-        response = self.client.get(reverse('challenges-step-list', kwargs={
-            'parent_lookup_challenge_steps': str(challenge_step.challenge.id)}))
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), [
-            {'etc': challenge_step.etc, 'id': str(challenge_step.id),
-             'title': challenge_step.title}])
-
-    def test_retrieve_challenge_step_list_challenge_not_found(self):
+class TestChallengeOverviewView(APITestCase):
+    def test_overview(self):
         user = UserFactory()
         self.client.force_authenticate(user=user)
-        response = self.client.get(reverse('challenges-step-list',
-                                           kwargs={'parent_lookup_challenge_steps': 'random'}))
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), [])
-
-    def test_retrieve_challenge_steps_list(self):
-        state = ChallengeStepStateFactory()
-        user = state.user
-        challenge_step = state.challenge_step
-
-        self.client.force_authenticate(user=user)
-        response = self.client.get(reverse('challenges-step-detail', kwargs={
-            'parent_lookup_challenge_steps': str(challenge_step.challenge.id),
-            'pk': str(challenge_step.id)}))
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'etc': challenge_step.etc, 'id': str(challenge_step.id),
-                                           'title': challenge_step.title,
-                                           'state': {'message': state.message,
-                                                     'status': state.status}})
-
-    def test_retrieve_challenge_steps_list_not_authenticated(self):
+        response = self.client.get(reverse('challenge-overview'))
+        print(response.json())
         raise NotImplementedError
-
-    def test_retrieve_challenge_steps_detail_not_found(self):
-        challenge = ChallengeFactory()
-        user = UserFactory()
-        self.client.force_authenticate(user=user)
-        response = self.client.get(reverse('challenges-step-detail',
-                                           kwargs={'parent_lookup_challenge_steps': str(challenge.id),
-                                                   'pk': 'random'}))
-
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-        self.assertEqual(response.json(), {'detail': 'Not found.'})
-
-    def test_retrieve_challenge_steps_detail_not_authenticated(self):
-        raise NotImplementedError
-

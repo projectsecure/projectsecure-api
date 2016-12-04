@@ -1,26 +1,38 @@
-from rest_framework.viewsets import ReadOnlyModelViewSet
-from challenges.serializers import ChallengeSerializer, ChallengeStepSerializer
-from challenges.models import Challenge, ChallengeStep
-from rest_framework.permissions import AllowAny
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+from challenges.serializers import ChallengeMetaSerializer, ChallengeSerializer
+from challenges.models.challenge import Challenge
+from rest_framework.views import APIView
+from challenges.models import CHALLENGES
 from rest_framework.response import Response
-from rest_framework.decorators import detail_route
 
 
 class ChallengeViewSet(ReadOnlyModelViewSet):
     serializer_class = ChallengeSerializer
-    queryset = Challenge.objects.all()
-    permission_classes = (AllowAny,)
+
+    def get_queryset(self):
+        user = self.request.user
+        return Challenge.objects.filter(user=user)
 
 
-class ChallengeStepViewSet(ReadOnlyModelViewSet):
-    serializer_class = ChallengeStepSerializer
-    queryset = ChallengeStep.objects.all()
-
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
+class ChallengeMetaView(APIView):
+    def get(self, *args, **kwargs):
+        serializer = ChallengeMetaSerializer(instance=CHALLENGES, many=True)
         return Response(serializer.data)
 
-    @detail_route(methods=['post'])
-    def state(self, request):
-        return Response({})
+
+class ChallengeStepViewSet(APIView):
+    def get_queryset(self):
+        user = self.request.user
+        return Challenge.objects.filter(user=user)
+
+    def post(self, *args, **kwargs):
+        user = self.request.user
+        challenge = Challenge.objects.filter(user=user)
+
+        steps = challenge.ChallengeMeta.steps
+
+        challenge.on_input()
+
+        serializer = ChallengeMetaSerializer(instance=s, many=True)
+
+        return Response(serializer.data)
