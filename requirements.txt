@@ -1,6 +1,16 @@
 Django==1.10.3
 djangorestframework==3.5.2
+psycopg2==2.6.2
+djangorestframework-jwt==1.8.0
+django-extensions==1.7.4
+drf-extensions==0.3.1
+requests==2.11.1
 
 # Testing
 pytest-django==3.0.0
-flake8==3.0.4
+faker==0.7.3
+pytest-pep8==1.0.6
+pytest-flakes==1.0.1
+factory-boy
+fake-factory==0.5.9
+mock==2.0.0
