@@ -1,4 +1,4 @@
-from challenges.models.challenge import Challenge, TextStep, ActionStep
+from challenges.models.challenge import Challenge, TextStep, ActionStep, register_step
 import requests
 
 
@@ -11,17 +11,11 @@ class IdentityLeakCheckerChallenge(Challenge):
         persönlichen Daten (z.B. Telefonnummer, Geburtsdatum oder Adresse) im Internet offengelegt
         wurde und missbraucht werden könnte."""
         steps = [
-            ('introduction', TextStep(text='Starte die Challenge mit einem Klick auf den Button')),
-            ('check_mail' , ActionStep(action_title='Start'))
+            ('introduction', TextStep(title='sdf', text='Starte die Challenge mit einem Klick auf den Button')),
+            ('check_mail', ActionStep(title='', text=''))
         ]
 
-    def __init__(self):
-        super(IdentityLeakCheckerChallenge, self).__init__()
-
-        self.step_map = {
-            'check_mail': self.check_email
-        }
-
+    @register_step()
     def check_email(self, *args, **kwargs):
         """
         Send the user's email to the HPI Identity Leak Checker

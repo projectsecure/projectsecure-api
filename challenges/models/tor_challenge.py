@@ -1,4 +1,4 @@
-from challenges.models.challenge import Challenge, TextStep, ActionStep
+from challenges.models.challenge import Challenge, TextStep, ActionStep, register_step
 import requests
 
 
@@ -11,11 +11,11 @@ class TorChallenge(Challenge):
         persönlichen Daten (z.B. Telefonnummer, Geburtsdatum oder Adresse) im Internet offengelegt
         wurde und missbraucht werden könnte."""
         steps = [
-            ('introduction', TextStep(text='Starte die Challenge mit einem Klick auf den Button')),
-            ('start_action', ActionStep(action_name='Start'))
+            ('introduction', TextStep(title='', text='Starte die Challenge mit einem Klick auf den Button')),
+            ('check_tor_connection', ActionStep(title='', text=''))
         ]
 
-    @staticmethod
+    @register_step()
     def check_tor_connection(ip):
         """
         Checks if the given IP is a Tor exit node

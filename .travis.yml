@@ -12,4 +12,4 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
 script:
-  - ./scripts/run_tests.h
+  - docker-compose run web py.test

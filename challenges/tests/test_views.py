@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from challenges.tests.factories import ChallengeFactory
 from users.tests.factories import UserFactory
-
+from challenges.models import TOR_CHALLENGE
 
 class TestChallengeViewSet(APITestCase):
     def test_retrieve_challenge(self):
@@ -31,11 +31,21 @@ class TestChallengeViewSet(APITestCase):
              'title': challenge.title}])
 
 
-class TestChallengeOverviewView(APITestCase):
-    def test_overview(self):
+class TestTorChallenge(APITestCase):
+    def test_start_challenge(self):
         user = UserFactory()
         self.client.force_authenticate(user=user)
 
-        response = self.client.get(reverse('challenge-overview'))
+        response = self.client.post(reverse('challenge-start', kwargs={'pk': TOR_CHALLENGE}))
+
         print(response.json())
-        raise NotImplementedError
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {})
+
+    def test_start_challenge_already_started(self):
+        pass
+
+    def test_start_not_authorized(self):
+        pass
+

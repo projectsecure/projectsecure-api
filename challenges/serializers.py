@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from challenges.models.challenge import Challenge
+from challenges.models.challenge import Challenge, ActionStep, TextStep, Step
 
 
 class ChallengeMetaSerializer(serializers.HyperlinkedModelSerializer):
@@ -27,7 +27,6 @@ class ChallengeMetaSerializer(serializers.HyperlinkedModelSerializer):
 class ChallengeSerializer(serializers.HyperlinkedModelSerializer):
     title = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
-    slug = serializers.SerializerMethodField()
     steps = serializers.SerializerMethodField()
 
     class Meta:
@@ -35,15 +34,11 @@ class ChallengeSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('title', 'description', 'steps', 'status', 'message')
 
     def get_steps(self, obj):
-        return obj.ChallengeMeta.steps
+        return [{'name': step[0], 'type': type(step[1]).__name__, 'options': step[1].to_json()} for
+                step in obj.ChallengeMeta.steps]
 
     def get_title(self, obj):
         return obj.ChallengeMeta.title
 
     def get_description(self, obj):
         return obj.ChallengeMeta.description
-
-
-class ChallengeStepSerializer(serializers.HyperlinkedModelSerializer):
-    pass
-    # TODO: Return format: {'type': 'action', 'options': {}}
