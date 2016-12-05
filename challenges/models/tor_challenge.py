@@ -16,12 +16,14 @@ class TorChallenge(Challenge):
         ]
 
     @register_step()
-    def check_tor_connection(ip):
+    def check_tor_connection(self, request):
         """
         Checks if the given IP is a Tor exit node
 
         Returns True if given IP is Tor exit node
         """
+        ip = request.META.get('REMOTE_ADDR')
         url = 'https://check.torproject.org/exit-addresses'
         response = requests.get(url)
-        return ip in (response.content or '')
+
+        return ip in (response.text or '')

@@ -30,7 +30,12 @@ class Challenge(models.Model):
     def get_registered_steps(self):
         registered_steps = {}
         for methodname in dir(self):
-            attr = getattr(self, methodname)
+            # Ignore relational fuckups
+            try:
+                attr = getattr(self, methodname)
+            except :
+                continue
+
             registered = getattr(attr, 'registered', False)
 
             if registered:
@@ -38,9 +43,9 @@ class Challenge(models.Model):
 
         return registered_steps
 
-    def on_input(self, key, *args, **kwargs):
+    def on_input(self, key, request):
         step_func = self.get_registered_steps()[key]
-        step_func(args, kwargs)
+        step_func(request)
 
 
 def register_step(**kwargs):

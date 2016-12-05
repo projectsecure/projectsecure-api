@@ -25,10 +25,3 @@ class TestChallengeStepUrls(TestCase):
         url = reverse('challenges-step-detail',
                       kwargs={'parent_lookup_challenge_steps': parent, 'pk': pk})
         self.assertEqual(url, '/api/challenges/{0}/steps/{1}'.format(parent, pk))
-
-    def test_challenge_step_state_url(self):
-        parent = 'd35849a4-53ae-47e7-a559-3a32909693ed'
-        pk = 'c35849a4-53ae-47e7-a559-3a32909693ed'
-        url = reverse('challenges-step-state',
-                      kwargs={'parent_lookup_challenge_steps': parent, 'pk': pk})
-        self.assertEqual(url, '/api/challenges/{0}/steps/{1}/state'.format(parent, pk))

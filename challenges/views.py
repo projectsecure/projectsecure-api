@@ -1,4 +1,4 @@
-from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, mixins, GenericViewSet
 from challenges.serializers import ChallengeMetaSerializer, ChallengeSerializer
 from challenges.models.challenge import Challenge
 from rest_framework.views import APIView
@@ -30,19 +30,21 @@ class ChallengeViewSet(ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class ChallengeStepViewSet(APIView):
+class ChallengeStepViewSet(GenericViewSet, mixins.ListModelMixin, mixins.UpdateModelMixin):
     def get_queryset(self):
-        user = self.request.user
-        return Challenge.objects.filter(user=user)
+        raise NotImplementedError
 
-    def post(self, request,  *args, **kwargs):
-        user = self.request.user
-        challenge = Challenge.objects.filter(user=user)
+    def list(self, request, parent_lookup_challenge_steps, *args, **kwargs):
+        steps = dict(CHALLENGES)[parent_lookup_challenge_steps].ChallengeMeta.steps
 
-        steps = challenge.ChallengeMeta.steps
+        data = [{'name': step[0], 'type': type(step[1]).__name__, 'options': step[1].to_json()} for
+                step in steps]
 
-        challenge.on_input(request.data)
+        return Response(data)
 
-        serializer = ChallengeMetaSerializer(instance=steps, many=True)
+    def update(self, request, parent_lookup_challenge_steps, pk, *args, **kwargs):
+        challenge = dict(CHALLENGES)[parent_lookup_challenge_steps].objects.get(user=request.user)
+        print(pk)
+        data = challenge.on_input(pk, request) or {}
 
-        return Response(serializer.data)
+        return Response(data)
