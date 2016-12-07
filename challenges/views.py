@@ -1,22 +1,22 @@
 from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet, mixins, GenericViewSet
 from challenges.serializers import ChallengeMetaSerializer, ChallengeSerializer
 from challenges.models.challenge import Challenge
-from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from challenges.models import CHALLENGES
 from rest_framework.response import Response
-from rest_framework.decorators import detail_route
+from rest_framework.decorators import detail_route, permission_classes
 from challenges.models.challenge import IN_PROGRESS
+from rest_framework.views import APIView
 
 
-class ChallengeViewSet(ReadOnlyModelViewSet):
-    serializer_class = ChallengeSerializer
-
+class ChallengeViewSet(mixins.RetrieveModelMixin,
+                       GenericViewSet):
     def get_queryset(self):
-        user = self.request.user
-        return Challenge.objects.filter(user=user)
+        raise NotImplementedError
 
-    def list(self, request, *args, **kwargs):
-        serializer = ChallengeMetaSerializer(instance=CHALLENGES, many=True)
+    def retrieve(self, request, pk, *args, **kwargs):
+        challenge = dict(CHALLENGES)[pk].object.get(user=request.user)
+        serializer = ChallengeSerializer(instance=challenge)
         return Response(serializer.data)
 
     @detail_route(methods=['post'])
@@ -25,8 +25,15 @@ class ChallengeViewSet(ReadOnlyModelViewSet):
         challenge.user = request.user
         challenge.status = IN_PROGRESS
         challenge.save()
-
         serializer = ChallengeSerializer(instance=challenge)
+        return Response(serializer.data)
+
+
+class ChallengesMetaView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, *args, **kwargs):
+        serializer = ChallengeMetaSerializer(instance=CHALLENGES, many=True)
         return Response(serializer.data)
 
 

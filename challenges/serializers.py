@@ -9,7 +9,7 @@ class ChallengeMetaSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Challenge
-        fields = ('slug', 'title', 'description', 'steps')
+        fields = ('slug', 'title', 'description')
 
     def get_title(self, obj):
         return obj[1].ChallengeMeta.title
@@ -19,9 +19,6 @@ class ChallengeMetaSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_slug(self, obj):
         return obj[0]
-
-    def get_steps(self, obj):
-        return obj[1].ChallengeMeta.steps
 
 
 class ChallengeSerializer(serializers.HyperlinkedModelSerializer):
