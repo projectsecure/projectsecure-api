@@ -1,32 +1,12 @@
 from rest_framework import serializers
-from challenges.models.challenge import Challenge, ActionStep, TextStep, Step
+from challenges.models import TorChallenge, IdentityLeakCheckerChallenge, IDENTITY_LEAK_CECKER_CHALLENGE, TOR_CHALLENGE
 
 
-class ChallengeMetaSerializer(serializers.HyperlinkedModelSerializer):
-    title = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
-    slug = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Challenge
-        fields = ('slug', 'title', 'description')
-
-    def get_title(self, obj):
-        return obj[1].ChallengeMeta.title
-
-    def get_description(self, obj):
-        return obj[1].ChallengeMeta.description
-
-    def get_slug(self, obj):
-        return obj[0]
-
-
-class ChallengeSerializer(serializers.HyperlinkedModelSerializer):
+class ChallengeSerializerMixin:
     title = serializers.SerializerMethodField()
     description = serializers.SerializerMethodField()
 
     class Meta:
-        model = Challenge
         fields = ('title', 'description', 'status', 'message')
 
     def get_title(self, obj):
@@ -34,3 +14,21 @@ class ChallengeSerializer(serializers.HyperlinkedModelSerializer):
 
     def get_description(self, obj):
         return obj.ChallengeMeta.description
+
+
+class TorChallengeSerializer(serializers.HyperlinkedModelSerializer, ChallengeSerializerMixin):
+    class Meta:
+        model = TorChallenge
+        fields = ChallengeSerializerMixin.Meta.fields
+
+
+class IdentityLeakCheckerChallengeSerializer(serializers.HyperlinkedModelSerializer, ChallengeSerializerMixin):
+    class Meta:
+        model = IdentityLeakCheckerChallenge
+        fields = ChallengeSerializerMixin.Meta.fields
+
+
+CHALLENGE_SERIALIZERS = (
+    (IDENTITY_LEAK_CECKER_CHALLENGE, IdentityLeakCheckerChallengeSerializer),
+    (TOR_CHALLENGE, TorChallengeSerializer)
+)

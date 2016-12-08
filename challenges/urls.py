@@ -10,6 +10,6 @@ router.register(r'challenges', ChallengeViewSet, base_name='challenge')\
               parents_query_lookups=['challenge_steps'])
 
 urlpatterns = [
-    url(r'challenges', ChallengesMetaView.as_view(), name='challenge-list'),
-    url(r'^', include(router.urls)),
+    url(r'', include(router.urls)),
+    url(r'^challenges$', ChallengesMetaView.as_view(), name='challenge-list'),
 ]

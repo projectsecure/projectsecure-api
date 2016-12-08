@@ -1,6 +1,5 @@
 import factory
-from challenges.models.challenge import Challenge
-from challenges.models.tor_challenge import TorChallenge
+from challenges.models import Challenge, TorChallenge
 from faker import Factory as FakeFactory
 from users.tests.factories import UserFactory
 

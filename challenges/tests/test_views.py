@@ -9,6 +9,7 @@ from challenges.models import TOR_CHALLENGE, CHALLENGES
 class TestChallengeViewSet(APITestCase):
     def test_retrieve_challenge(self):
         challenge = TorChallengeFactory()
+        self.client.force_authenticate(user=challenge.user)
         response = self.client.get(reverse('challenge-detail', kwargs={'pk': TOR_CHALLENGE}))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -19,10 +20,18 @@ class TestChallengeViewSet(APITestCase):
 
     def test_retrieve_challenge_not_found(self):
         pk = 'a_random_id'
+        self.client.force_authenticate(user=UserFactory())
         response = self.client.get(reverse('challenge-detail', kwargs={'pk': pk}))
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
         self.assertEqual(response.json(), {'detail': 'Not found.'})
+
+    def test_retrieve_not_authorized(self):
+        response = self.client.get(reverse('challenge-detail', kwargs={'pk': TOR_CHALLENGE}))
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.json(),
+                         {'detail': 'Authentication credentials were not provided.'})
 
     def test_retrieve_all_challenges(self):
         response = self.client.get(reverse('challenge-list'))
