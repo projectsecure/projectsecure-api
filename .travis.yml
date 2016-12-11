@@ -15,6 +15,7 @@ script:
   - docker-compose run web py.test
 after_success:
   - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker build -t nikriek/projectsecure-api .
     docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
     docker push nikriek/projectsecure-api;
     fi
