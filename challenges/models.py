@@ -59,7 +59,7 @@ def register_step_handler():
 
 
 class Step:
-    def __init__(self, title: str, text: str=None):
+    def __init__(self, title: str, text: str):
         self.title = title
         self.text = text
 
@@ -71,13 +71,27 @@ class TextStep(Step):
     pass
 
 
-class ActionStep(Step):
-    def __init__(self, action_title: str, title: str, text: str=None):
-        super(ActionStep, self).__init__(title, text)
-        self.action_title = action_title
+class ButtonStep(Step):
+    def __init__(self, button_title: str, title: str, text: str=None):
+        super(ButtonStep, self).__init__(title, text)
+        self.button_title = button_title
 
     def to_json(self):
-        return super(ActionStep, self).to_json().update({'action_title': self.action_title})
+        json = super(ButtonStep, self).to_json()
+        json.update({'button_title': self.button_title})
+        return json
+
+
+class InputStep(Step):
+    def __init__(self, input_title: str, button_title: str, title: str, text: str = None):
+        super(InputStep, self).__init__(title, text)
+        self.input_title = input_title
+        self.button_title = button_title
+
+    def to_json(self):
+        json = super(InputStep, self).to_json()
+        json.update({'input_title': self.input_title, 'button_title': self.button_title})
+        return json
 
 
 class IdentityLeakCheckerChallenge(Challenge):
@@ -90,7 +104,7 @@ class IdentityLeakCheckerChallenge(Challenge):
         wurde und missbraucht werden könnte."""
         steps = [
             ('introduction', TextStep(title='sdf', text='Starte die Challenge mit einem Klick auf den Button')),
-            ('check_mail', ActionStep(action_title='Check Mail', title='', text=''))
+            ('check_mail', ButtonStep(button_title='Check Mail', title=''))
         ]
 
     @register_step_handler()
@@ -103,7 +117,7 @@ class IdentityLeakCheckerChallenge(Challenge):
         email = self.user.email
         url = 'https://sec.hpi.uni-potsdam.de/leak-checker/search'
         response = requests.post(url, data={'email': email})
-        return response.status_code == 200
+        return response.ok
 
 
 class TorChallenge(Challenge):
@@ -116,7 +130,7 @@ class TorChallenge(Challenge):
         wurde und missbraucht werden könnte."""
         steps = [
             ('introduction', TextStep(title='', text='Starte die Challenge mit einem Klick auf den Button')),
-            ('check_tor_connection', ActionStep(action_title='Check tor connection', title='', text=''))
+            ('check_tor_connection', ButtonStep(button_title='Check tor connection', title=''))
         ]
 
     @register_step_handler()

@@ -17,6 +17,13 @@ def get_challenge(name):
 
 
 def get_challenge_serializer(name):
+    """
+    Returns a serialzer object based on a challenge name.
+
+    Raises: NotFound - Error if callenge name was not found
+
+    Returns: ChallengeSerializer - A specialized serializer for a challenge
+    """
     serializer = dict(CHALLENGE_SERIALIZERS).get(name, None)
     if serializer is None:
         raise NotFound
@@ -29,7 +36,7 @@ class ChallengeViewSet(mixins.RetrieveModelMixin,
         raise NotImplementedError
 
     def retrieve(self, request, pk, *args, **kwargs):
-        challenge = get_challenge(pk).object.get(user=request.user)
+        challenge = get_challenge(pk).objects.get(user=request.user)
         serializer = get_challenge_serializer(pk)(instance=challenge)
         return Response(serializer.data)
 

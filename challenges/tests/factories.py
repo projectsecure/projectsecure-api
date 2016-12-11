@@ -1,5 +1,5 @@
 import factory
-from challenges.models import Challenge, TorChallenge
+from challenges.models import Challenge, TorChallenge, IdentityLeakCheckerChallenge
 from faker import Factory as FakeFactory
 from users.tests.factories import UserFactory
 
@@ -16,3 +16,8 @@ class ChallengeFactory(factory.DjangoModelFactory):
 class TorChallengeFactory(ChallengeFactory):
     class Meta:
         model = TorChallenge
+
+
+class IdentityLeakCheckerChallengeFactory(ChallengeFactory):
+    class Meta:
+        model = IdentityLeakCheckerChallenge

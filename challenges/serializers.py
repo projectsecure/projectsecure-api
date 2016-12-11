@@ -3,9 +3,6 @@ from challenges.models import TorChallenge, IdentityLeakCheckerChallenge, IDENTI
 
 
 class ChallengeSerializerMixin:
-    title = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
-
     class Meta:
         fields = ('title', 'description', 'status', 'message')
 
@@ -17,12 +14,19 @@ class ChallengeSerializerMixin:
 
 
 class TorChallengeSerializer(serializers.HyperlinkedModelSerializer, ChallengeSerializerMixin):
+    title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+
     class Meta:
         model = TorChallenge
         fields = ChallengeSerializerMixin.Meta.fields
 
 
-class IdentityLeakCheckerChallengeSerializer(serializers.HyperlinkedModelSerializer, ChallengeSerializerMixin):
+class IdentityLeakCheckerChallengeSerializer(serializers.HyperlinkedModelSerializer,
+                                             ChallengeSerializerMixin):
+    title = serializers.SerializerMethodField()
+    description = serializers.SerializerMethodField()
+
     class Meta:
         model = IdentityLeakCheckerChallenge
         fields = ChallengeSerializerMixin.Meta.fields

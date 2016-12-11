@@ -12,6 +12,11 @@ class TestChallengeUrls(TestCase):
         url = reverse('challenge-detail', kwargs={'pk': pk})
         self.assertEqual(url, '/api/challenges/{0}'.format(pk))
 
+    def test_challenge_start_url(self):
+        pk = 'c35849a4-53ae-47e7-a559-3a32909693ed'
+        url = reverse('challenge-start', kwargs={'pk': pk})
+        self.assertEqual(url, '/api/challenges/{0}/start'.format(pk))
+
 
 class TestChallengeStepUrls(TestCase):
     def test_challenge_step_list_url(self):

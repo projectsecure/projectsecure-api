@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from challenges.tests.factories import ChallengeFactory, TorChallengeFactory
 from users.tests.factories import UserFactory
-from challenges.models import TOR_CHALLENGE, CHALLENGES
+from challenges.models import TOR_CHALLENGE, CHALLENGES, Challenge
 
 
 class TestChallengeViewSet(APITestCase):
@@ -54,7 +54,7 @@ class TestTorChallenge(APITestCase):
         self.assertEqual(response.json(), {'title': challenge.ChallengeMeta.title,
                                            'description': challenge.ChallengeMeta.description,
                                            'message': challenge.message,
-                                           'status': challenge.status})
+                                           'status': Challenge.IN_PROGRESS})
 
     def test_start_challenge_already_started(self):
         pass
@@ -64,14 +64,30 @@ class TestTorChallenge(APITestCase):
 
 
 class TestChallengeStepView(APITestCase):
-    def test_list_challenge_steps(self):
+    def test_list_challenge_steps_not_found(self):
         user = UserFactory()
         self.client.force_authenticate(user=user)
 
-        response = self.client.get(reverse('challenges-step-list',
-                                           kwargs={'parent_lookup_challenge_steps': TOR_CHALLENGE}))
+        for challenge_type in CHALLENGES:
+            response = self.client.get(reverse('challenges-step-list',
+                                           kwargs={'parent_lookup_challenge_steps': challenge_type[0]}))
 
-        assert False
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
+                             msg='Challenge should not be found for {0} type'.format(challenge_type[0]))
+            self.assertEqual(response.json(), {})
+
+    def test_list_challenge_steps(self):
+        challenge = TorChallengeFactory()
+        self.client.force_authenticate(user=challenge.user)
+
+        for challenge_type in CHALLENGES:
+            response = self.client.get(reverse('challenges-step-list',
+                                               kwargs={
+                                                   'parent_lookup_challenge_steps': challenge_type[0]}))
+
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            expected_response = [{'name': step[0], 'type': type(step[1]).__name__, 'options': {}} for step in challenge_type[1].ChallengeMeta.steps]
+            self.assertEqual(response.json(), expected_response)
 
     def test_detail_challenge_steps(self):
         tor_challenge = TorChallengeFactory()
@@ -79,6 +95,7 @@ class TestChallengeStepView(APITestCase):
         self.client.force_authenticate(user=tor_challenge.user)
 
         response = self.client.put(reverse('challenges-step-detail',
-                                           kwargs={'parent_lookup_challenge_steps': TOR_CHALLENGE, 'pk': 'check_tor_connection'}))
+                                           kwargs={'parent_lookup_challenge_steps': TOR_CHALLENGE,
+                                                   'pk': 'check_tor_connection'}))
 
         assert False

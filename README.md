@@ -13,6 +13,9 @@
 $ docker-compose run web py.test
 ```
 
+## How to add a new challenge
+
+
 ## TODO
 - Email confirmation
 - Email unique/required
