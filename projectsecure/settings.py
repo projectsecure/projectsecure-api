@@ -9,7 +9,9 @@ JWT_SECRET_KEY = os.environ['JWT_SECRET_KEY']
 
 DEBUG = os.environ['DEBUG'] == 'TRUE'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    os.environ['HOST']
+]
 
 
 # Application definition
