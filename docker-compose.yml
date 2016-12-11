@@ -24,6 +24,7 @@ services:
       JWT_SECRET_KEY: "A random key"
       SECRET_KEY: "m5rk2z!-z4jx+)w@p!n_y338d56fgtjxob-j^goj7dt6k&f!!!"
       DEBUG: "TRUE"
+      HOST: "www.projectsecure.org"
 
 networks:
   projectsecure:
