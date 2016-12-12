@@ -14,7 +14,7 @@ $ docker-compose run web py.test
 ```
 
 ## How to add a new challenge
-1. In `challenges.models.py` add a new challenge class that inherits from `Challenge`
+In `challenges.models.py` add a new challenge class that inherits from `Challenge`.
 
 ```python
 class AnExampleChallenge(Challenge):
@@ -28,7 +28,7 @@ class AnExampleChallenge(Challenge):
         ]
 ```
 
-2. Define a callback for the `a_button_step` step defined in `steps`above using the `register_step_handler()` decorator.
+Define a callback for the `a_button_step` step defined in `steps`above using the `register_step_handler()` decorator.
 
 ```python
     @register_step_handler()
@@ -37,7 +37,8 @@ class AnExampleChallenge(Challenge):
 
 ```
 
-3. Register a slug under with the challenge is reachable.
+
+Register a slug under with the challenge is reachable.
 
 ```python
 AN_EXAMPLE_CHALLENGE = 'an_example_challenge'
