@@ -27,14 +27,18 @@ class TestChallenge(TestCase):
 
 class TestIdentityLeakCheckerChallenge(TestCase):
     def test_check_email(self):
+        email = 'test@example.com'
         challenge = IdentityLeakCheckerChallengeFactory()
         url = 'https://sec.hpi.uni-potsdam.de/leak-checker/search'
+
+        request_mock = Mock()
+        request_mock.data.get.return_value = email
 
         with patch('requests.post') as patched_post:
             type(patched_post.return_value).ok = PropertyMock(return_value=True)
 
-            self.assertTrue(challenge.check_email())
-            patched_post.assert_called_once_with(url, data={'email': challenge.user.email})
+            challenge.check_email(request_mock)
+            patched_post.assert_called_once_with(url, data={'email': email})
 
 
 class TestTorChallenge(TestCase):
@@ -49,7 +53,7 @@ class TestTorChallenge(TestCase):
         with patch('requests.get') as patched_get:
             type(patched_get.return_value).text = PropertyMock(return_value=mocked_ip)
 
-            self.assertTrue(challenge.check_tor_connection(request_mock))
+            challenge.check_tor_connection(request_mock)
             request_mock.META.get.assert_called_once_with('REMOTE_ADDR')
             patched_get.assert_called_once_with(url)
 

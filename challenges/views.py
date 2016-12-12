@@ -1,6 +1,6 @@
 from rest_framework.viewsets import mixins, GenericViewSet
 from challenges.serializers import CHALLENGE_SERIALIZERS
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from challenges.models import CHALLENGES
 from rest_framework.response import Response
 from challenges.models import Challenge
@@ -57,6 +57,8 @@ class ChallengeStepUpdateView(APIView):
 
 
 class ChallengeStartView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request, challenge_name, *args, **kwargs):
         challenge = get_challenge(challenge_name)()
         challenge.user = request.user

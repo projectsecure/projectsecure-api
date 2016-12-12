@@ -64,8 +64,9 @@ class TestChallengeStepsView(APITestCase):
                 'challenge_name': challenge_type[0]}))
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            expected_response = [{'name': step[0], 'type': type(step[1]).__name__, 'options': {}}
-                                 for step in challenge_type[1].ChallengeMeta.steps]
+            expected_response = [{'name': step[0], 'type': type(step[1]).__name__,
+                                  'options': step[1].to_json()} for step in
+                                 challenge_type[1].ChallengeMeta.steps]
             self.assertEqual(response.json(), expected_response)
 
 
@@ -78,21 +79,25 @@ class TestChallengeStepUpdateView(APITestCase):
         self.client.force_authenticate(user=user)
 
         for challenge_type in CHALLENGES:
-            response = self.client.get(reverse('challenges-step-update',
-                                               kwargs={'challenge_name': challenge_type[0]}))
+            for step_type in challenge_type[1].ChallengeMeta.steps:
+                response = self.client.put(reverse('challenges-step-update',
+                                                   kwargs={'challenge_name': challenge_type[0],
+                                                           'step_name': step_type[0]}))
 
-            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
-                             msg='Challenge should not be found for {0} type'.format(
-                                 challenge_type[0]))
-            self.assertEqual(response.json(), {})
+                self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
+                                 msg='Challenge should not be found for {0} type'.format(
+                                     challenge_type[0]))
+                self.assertEqual(response.json(), {'detail': 'Not found.'})
 
     def test_update_step_not_authorized(self):
         for challenge_type in CHALLENGES:
-            response = self.client.put(
-                reverse('challenges-step-update', kwargs={'challenge_name': challenge_type[0]}))
+            for step_type in challenge_type[1].ChallengeMeta.steps:
+                response = self.client.put(
+                    reverse('challenges-step-update', kwargs={'challenge_name': challenge_type[0],
+                            'step_name': step_type[0]}))
 
-            self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-            self.assertEqual(response.json(),
+                self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+                self.assertEqual(response.json(),
                          {'detail': 'Authentication credentials were not provided.'})
 
 
@@ -127,14 +132,14 @@ class TestChallengeStartView(APITestCase):
         user = UserFactory()
         self.client.force_authenticate(user=user)
 
-        for challenge_type in CHALLENGES:
-            response = self.client.post(reverse('challenge-start',
-                                               kwargs={'challenge_name': challenge_type[0]}))
+        challenge_name = 'a_name'
 
-            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
-                             msg='Challenge should not be found for {0} type'.format(
-                                 challenge_type[0]))
-            self.assertEqual(response.json(), {})
+        response = self.client.post(reverse('challenge-start',
+                                            kwargs={'challenge_name': challenge_name}))
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
+                         msg='Challenge should not be found for {0} type'.format(challenge_name))
+        self.assertEqual(response.json(), {'detail': 'Not found.'})
 
 
 

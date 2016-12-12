@@ -103,21 +103,29 @@ class IdentityLeakCheckerChallenge(Challenge):
         persönlichen Daten (z.B. Telefonnummer, Geburtsdatum oder Adresse) im Internet offengelegt
         wurde und missbraucht werden könnte."""
         steps = [
-            ('introduction', TextStep(title='sdf', text='Starte die Challenge mit einem Klick auf den Button')),
+            ('introduction',
+             TextStep(title='sdf', text='Starte die Challenge mit einem Klick auf den Button')),
             ('check_mail', InputStep(input_title='Enter email', button_title='Check', title=''))
         ]
 
     @register_step_handler()
-    def check_email(self, *args, **kwargs):
+    def check_email(self, request, *args, **kwargs):
         """
         Send the user's email to the HPI Identity Leak Checker
 
         Returns True if web request was successful
         """
-        email = ''
+        if self.status == Challenge.DONE:
+            return
+
+        email = request.data.get('input')
         url = 'https://sec.hpi.uni-potsdam.de/leak-checker/search'
         response = requests.post(url, data={'email': email})
-        return response.ok
+
+        if response.ok:
+            self.status = Challenge.DONE
+        else:
+            self.status = Challenge.ERROR
 
 
 class TorChallenge(Challenge):
@@ -129,7 +137,8 @@ class TorChallenge(Challenge):
         persönlichen Daten (z.B. Telefonnummer, Geburtsdatum oder Adresse) im Internet offengelegt
         wurde und missbraucht werden könnte."""
         steps = [
-            ('introduction', TextStep(title='', text='Starte die Challenge mit einem Klick auf den Button')),
+            ('introduction',
+             TextStep(title='', text='Starte die Challenge mit einem Klick auf den Button')),
             ('check_tor_connection', ButtonStep(button_title='Check tor connection', title=''))
         ]
 
@@ -140,11 +149,17 @@ class TorChallenge(Challenge):
 
         Returns True if given IP is Tor exit node
         """
+        if self.status == Challenge.DONE:
+            return
+
         ip = request.META.get('REMOTE_ADDR')
         url = 'https://check.torproject.org/exit-addresses'
         response = requests.get(url)
 
-        return ip in (response.text or '')
+        if ip in (response.text or ''):
+            self.status = Challenge.DONE
+        else:
+            self.status = Challenge.ERROR
 
 
 IDENTITY_LEAK_CECKER_CHALLENGE = 'identity_leak_checker'
