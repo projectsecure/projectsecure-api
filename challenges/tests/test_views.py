@@ -1,13 +1,13 @@
 from rest_framework.test import APITestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from challenges.tests.factories import CHALLENGE_FACTORIES
+from challenges.tests.factories import CHALLENGE_FACTORIES, ChallengeFactory
 from users.tests.factories import UserFactory
 from challenges.models import TOR_CHALLENGE, CHALLENGES, Challenge
 
 
-def get_challenge_factory(name):
-    return dict(CHALLENGES)[name]
+def get_challenge_factory(name) -> ChallengeFactory:
+    return dict(CHALLENGE_FACTORIES)[name]()
 
 
 class TestChallengeDetailView(APITestCase):
