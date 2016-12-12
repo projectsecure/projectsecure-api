@@ -1,5 +1,5 @@
 import factory
-from challenges.models import Challenge, TorChallenge, IdentityLeakCheckerChallenge
+from challenges.models import Challenge, TorChallenge, IdentityLeakCheckerChallenge, IDENTITY_LEAK_CECKER_CHALLENGE, TOR_CHALLENGE
 from faker import Factory as FakeFactory
 from users.tests.factories import UserFactory
 
@@ -21,3 +21,9 @@ class TorChallengeFactory(ChallengeFactory):
 class IdentityLeakCheckerChallengeFactory(ChallengeFactory):
     class Meta:
         model = IdentityLeakCheckerChallenge
+
+
+CHALLENGE_FACTORIES = (
+    (IDENTITY_LEAK_CECKER_CHALLENGE, IdentityLeakCheckerChallengeFactory),
+    (TOR_CHALLENGE, TorChallengeFactory)
+)

@@ -104,7 +104,7 @@ class IdentityLeakCheckerChallenge(Challenge):
         wurde und missbraucht werden könnte."""
         steps = [
             ('introduction', TextStep(title='sdf', text='Starte die Challenge mit einem Klick auf den Button')),
-            ('check_mail', ButtonStep(button_title='Check Mail', title=''))
+            ('check_mail', InputStep(input_title='Enter email', button_title='Check', title=''))
         ]
 
     @register_step_handler()
@@ -114,7 +114,7 @@ class IdentityLeakCheckerChallenge(Challenge):
 
         Returns True if web request was successful
         """
-        email = self.user.email
+        email = ''
         url = 'https://sec.hpi.uni-potsdam.de/leak-checker/search'
         response = requests.post(url, data={'email': email})
         return response.ok

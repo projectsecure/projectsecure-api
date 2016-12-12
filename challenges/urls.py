@@ -1,15 +1,16 @@
-from rest_framework_extensions.routers import ExtendedSimpleRouter
-from challenges.views import ChallengeViewSet, ChallengeStepViewSet, ChallengesMetaView
-from django.conf.urls import url, include
+from challenges.views import ChallengesListView, ChallengeDetailView, ChallengeStepsView, \
+    ChallengeStepUpdateView, ChallengeStartView
 
-router = ExtendedSimpleRouter(trailing_slash=False)
-router.register(r'challenges', ChallengeViewSet, base_name='challenge')\
-    .register(r'steps',
-              ChallengeStepViewSet,
-              base_name='challenges-step',
-              parents_query_lookups=['challenge_steps'])
+from django.conf.urls import url
 
 urlpatterns = [
-    url(r'', include(router.urls)),
-    url(r'^challenges$', ChallengesMetaView.as_view(), name='challenge-list'),
+    url(r'^challenges/(?P<challenge_name>[a-z_]+)/steps/(?P<step_name>[a-z_]+)$',
+        ChallengeStepUpdateView.as_view(), name='challenges-step-update'),
+    url(r'^challenges/(?P<challenge_name>[a-z_]+)/steps$', ChallengeStepsView.as_view(),
+        name='challenges-step-list'),
+    url(r'^challenges/(?P<challenge_name>[a-z_]+)/start$', ChallengeStartView.as_view(),
+        name='challenge-start'),
+    url(r'^challenges/(?P<challenge_name>[a-z_]+)$', ChallengeDetailView.as_view(),
+        name='challenge-detail'),
+    url(r'^challenges$', ChallengesListView.as_view(), name='challenge-list'),
 ]
