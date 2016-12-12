@@ -34,7 +34,7 @@ class TestChallengeDetailView(APITestCase):
                 reverse('challenge-detail', kwargs={'challenge_name': challenge_type[0]}))
 
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-            self.assertEqual(response.json(), {'detail': 'Not found.'})
+            self.assertEqual(response.json(), {'error': 'Not found.'})
 
     def test_retrieve_not_authorized(self):
         for challenge_type in CHALLENGES:
@@ -43,7 +43,7 @@ class TestChallengeDetailView(APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(response.json(),
-                         {'detail': 'Authentication credentials were not provided.'})
+                         {'error': 'Authentication credentials were not provided.'})
 
 
 class TestChallengesListView(APITestCase):
@@ -87,7 +87,7 @@ class TestChallengeStepUpdateView(APITestCase):
                 self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
                                  msg='Challenge should not be found for {0} type'.format(
                                      challenge_type[0]))
-                self.assertEqual(response.json(), {'detail': 'Not found.'})
+                self.assertEqual(response.json(), {'error': 'Not found.'})
 
     def test_update_step_not_authorized(self):
         for challenge_type in CHALLENGES:
@@ -98,7 +98,7 @@ class TestChallengeStepUpdateView(APITestCase):
 
                 self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
                 self.assertEqual(response.json(),
-                         {'detail': 'Authentication credentials were not provided.'})
+                         {'error': 'Authentication credentials were not provided.'})
 
 
 class TestChallengeStartView(APITestCase):
@@ -126,7 +126,7 @@ class TestChallengeStartView(APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(response.json(),
-                             {'detail': 'Authentication credentials were not provided.'})
+                             {'error': 'Authentication credentials were not provided.'})
 
     def test_challenge_not_found(self):
         user = UserFactory()
@@ -139,7 +139,7 @@ class TestChallengeStartView(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
                          msg='Challenge should not be found for {0} type'.format(challenge_name))
-        self.assertEqual(response.json(), {'detail': 'Not found.'})
+        self.assertEqual(response.json(), {'error': 'Not found.'})
 
 
 
