@@ -28,17 +28,17 @@ class AnExampleChallenge(Challenge):
         ]
 ```
 
-Define a callback for the `a_button_step` step defined in `steps`above using the `register_step_handler()` decorator.
+Define a callback for the `a_button_step` step defined in `steps` above using the `register_step_handler()` decorator.
 
 ```python
-    @register_step_handler()
-    def a_button_step(self, request):
-        # Do some calculations or checks
+@register_step_handler()
+def a_button_step(self, request):
+    # Do some calculations or checks
 
 ```
 
 
-Register a slug under with the challenge is reachable.
+Register a slug under with the challenge should be reachable.
 
 ```python
 AN_EXAMPLE_CHALLENGE = 'an_example_challenge'
