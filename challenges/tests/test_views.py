@@ -5,6 +5,7 @@ from challenges.tests.factories import CHALLENGE_FACTORIES, ChallengeFactory
 from users.tests.factories import UserFactory
 from challenges.models import CHALLENGES, Challenge
 from django.db import transaction
+from challenges.models import ButtonStep, InputStep
 
 
 def get_challenge_factory(name) -> ChallengeFactory:
@@ -82,11 +83,18 @@ class TestChallengeStepsView(APITestCase):
 
 class TestChallengeStepUpdateView(APITestCase):
     def test_update_step(self):
+        # TODO, remove nesting level
         for challenge_type in CHALLENGES:
-            for step_type in challenge_type[1].ChallengeMeta.steps:
+            challenge = get_challenge_factory(challenge_type[0])
+            self.client.force_authenticate(user=challenge.user)
 
-            
-
+            for step_type in challenge.ChallengeMeta.steps:
+                if type(step_type[1]) in [ButtonStep, InputStep]:
+                    response = self.client.put(reverse('challenges-step-update',
+                                                       kwargs={'challenge_name': challenge_type[0],
+                                                               'step_name': step_type[0]}))
+                    self.assertEqual(response.status_code, status.HTTP_200_OK)
+                    self.assertEqual(response.json(), {})
 
     def test_update_step_not_found(self):
         user = UserFactory()

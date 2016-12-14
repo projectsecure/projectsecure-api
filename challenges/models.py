@@ -105,7 +105,7 @@ class IdentityLeakCheckerChallenge(Challenge):
         steps = [
             ('introduction',
              TextStep(title='sdf', text='Starte die Challenge mit einem Klick auf den Button')),
-            ('check_mail', InputStep(input_title='Enter email', button_title='Check', title=''))
+            ('check_email', InputStep(input_title='Enter email', button_title='Check', title=''))
         ]
 
     @register_step_handler()
