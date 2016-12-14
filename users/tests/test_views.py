@@ -1,5 +1,4 @@
 from rest_framework.test import APITestCase
-from faker import Factory as FakeFactory
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from .factories import UserFactory, DEFAULT_PASSWORD
@@ -28,7 +27,6 @@ class TestUserViewSet(APITestCase):
                                            'first_name': user.first_name, 'email': user.email})
 
     def test_me_unauthenticated(self):
-        user = UserFactory()
         response = self.client.get(reverse('user-me'))
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -70,6 +68,7 @@ class TestUserViewSet(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), {'password': ['This field is required.'],
                                            'username': ['This field is required.']})
+
 
 class TestAuthObtainJWTView(APITestCase):
     def test_login_with_credentials(self):

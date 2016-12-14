@@ -1,4 +1,3 @@
-from rest_framework.viewsets import mixins, GenericViewSet
 from challenges.serializers import CHALLENGE_SERIALIZERS
 from rest_framework.permissions import AllowAny
 from challenges.models import CHALLENGES
@@ -7,6 +6,8 @@ from challenges.models import Challenge
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
+from django.db import IntegrityError
+from rest_framework.status import HTTP_409_CONFLICT
 
 
 def get_challenge(name) -> 'Challenge':
@@ -61,7 +62,12 @@ class ChallengeStartView(APIView):
         challenge = get_challenge(challenge_name)()
         challenge.user = request.user
         challenge.status = Challenge.IN_PROGRESS
-        challenge.save()
+
+        try:
+            challenge.save()
+        except IntegrityError:
+            return Response({'error': 'Challenge was already started.'}, status=HTTP_409_CONFLICT)
+
         serializer = get_challenge_serializer(challenge_name)(instance=challenge)
         return Response(serializer.data)
 

@@ -11,6 +11,7 @@ class ChallengeFactory(factory.DjangoModelFactory):
         model = Challenge
 
     user = factory.SubFactory(UserFactory)
+    status = Challenge.NOT_STARTED
 
 
 class TorChallengeFactory(ChallengeFactory):

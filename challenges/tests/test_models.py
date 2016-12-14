@@ -1,5 +1,5 @@
 from django.test import TestCase
-from challenges.models import CHALLENGES, TorChallenge, ButtonStep, Step, TextStep, InputStep
+from challenges.models import CHALLENGES, ButtonStep, Step, TextStep, InputStep
 from challenges.tests.factories import IdentityLeakCheckerChallengeFactory, TorChallengeFactory
 from unittest.mock import patch, Mock, PropertyMock
 

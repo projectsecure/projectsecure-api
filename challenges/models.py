@@ -26,7 +26,7 @@ class Challenge(models.Model):
         steps = []
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default=NOT_STARTED)
     message = models.CharField(max_length=140, blank=True, null=False)
 

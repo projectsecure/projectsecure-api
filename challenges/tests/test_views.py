@@ -3,7 +3,8 @@ from django.core.urlresolvers import reverse
 from rest_framework import status
 from challenges.tests.factories import CHALLENGE_FACTORIES, ChallengeFactory
 from users.tests.factories import UserFactory
-from challenges.models import TOR_CHALLENGE, CHALLENGES, Challenge
+from challenges.models import CHALLENGES, Challenge
+from django.db import transaction
 
 
 def get_challenge_factory(name) -> ChallengeFactory:
@@ -22,9 +23,9 @@ class TestChallengeDetailView(APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(),
-                         {'description': challenge.ChallengeMeta.description,
-                          'title': challenge.ChallengeMeta.title, 'status': challenge.status,
-                          'message': challenge.message})
+                             {'description': challenge.ChallengeMeta.description,
+                              'title': challenge.ChallengeMeta.title, 'status': challenge.status,
+                              'message': challenge.message})
 
     def test_retrieve_challenge_not_found(self):
         user = UserFactory()
@@ -69,10 +70,23 @@ class TestChallengeStepsView(APITestCase):
                                  challenge_type[1].ChallengeMeta.steps]
             self.assertEqual(response.json(), expected_response)
 
+    def test_challenge_not_found(self):
+        for challenge_type in CHALLENGES:
+            response = self.client.get(reverse('challenges-step-list', kwargs={
+                'challenge_name': 'something'}))
+
+            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
+                         msg='Challenge should not be found for {0} type'.format(challenge_type[0]))
+            self.assertEqual(response.json(), {'error': 'Not found.'})
+
 
 class TestChallengeStepUpdateView(APITestCase):
     def test_update_step(self):
-        pass
+        for challenge_type in CHALLENGES:
+            for step_type in challenge_type[1].ChallengeMeta.steps:
+
+            
+
 
     def test_update_step_not_found(self):
         user = UserFactory()
@@ -98,26 +112,40 @@ class TestChallengeStepUpdateView(APITestCase):
 
                 self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
                 self.assertEqual(response.json(),
-                         {'error': 'Authentication credentials were not provided.'})
+                                 {'error': 'Authentication credentials were not provided.'})
 
 
 class TestChallengeStartView(APITestCase):
     def test_start_challenge(self):
+        user = UserFactory()
         for challenge_type in CHALLENGES:
-            challenge = get_challenge_factory(challenge_type[0])
+            challenge = challenge_type[1]
 
-            self.client.force_authenticate(user=challenge.user)
+            self.client.force_authenticate(user=user)
 
-            response = self.client.post(reverse('challenge-start', kwargs={'challenge_name': challenge_type[0]}))
+            response = self.client.post(
+                reverse('challenge-start', kwargs={'challenge_name': challenge_type[0]}))
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), {'title': challenge.ChallengeMeta.title,
                                                'description': challenge.ChallengeMeta.description,
-                                               'message': challenge.message,
+                                               'message': '',
                                                'status': Challenge.IN_PROGRESS})
+            self.assertEqual(challenge.objects.first().user, user)
 
     def test_start_challenge_already_started(self):
-        pass
+        for challenge_type in CHALLENGES:
+            # Object already exits in database --> started
+            challenge = get_challenge_factory(challenge_type[0])
+
+            self.client.force_authenticate(user=challenge.user)
+
+            with transaction.atomic():
+                response = self.client.post(
+                     reverse('challenge-start', kwargs={'challenge_name': challenge_type[0]}))
+
+            self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+            self.assertEqual(response.json(), {'error': 'Challenge was already started.'})
 
     def test_start_not_authorized(self):
         for challenge_type in CHALLENGES:
@@ -140,39 +168,3 @@ class TestChallengeStartView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
                          msg='Challenge should not be found for {0} type'.format(challenge_name))
         self.assertEqual(response.json(), {'error': 'Not found.'})
-
-
-
-"""
-
-class TestChallengeStepView(APITestCase):
-    def test_list_challenge_steps_not_found(self):
-        user = UserFactory()
-        self.client.force_authenticate(user=user)
-
-        for challenge_type in CHALLENGES:
-            response = self.client.get(reverse('challenges-step-list',
-                                           kwargs={'parent_lookup_challenge_steps': challenge_type[0]}))
-
-            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
-                             msg='Challenge should not be found for {0} type'.format(challenge_type[0]))
-            self.assertEqual(response.json(), {})
-
-    def test_list_challenge_steps(self):
-        challenge = TorChallengeFactory()
-        self.client.force_authenticate(user=challenge.user)
-
-
-
-    def test_detail_challenge_steps(self):
-        tor_challenge = TorChallengeFactory()
-
-        self.client.force_authenticate(user=tor_challenge.user)
-
-        response = self.client.put(reverse('challenges-step-detail',
-                                           kwargs={'parent_lookup_challenge_steps': TOR_CHALLENGE,
-                                                   'pk': 'check_tor_connection'}))
-
-        assert False
-
-"""
