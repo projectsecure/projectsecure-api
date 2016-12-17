@@ -6,5 +6,3 @@ class FeedbackSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Feedback
         fields = ('text',)
-
-

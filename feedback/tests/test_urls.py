@@ -6,4 +6,3 @@ class TestFeedbackUrls(TestCase):
     def test_feedback_url(self):
         url = reverse('feedback')
         self.assertEqual(url, '/api/feedback')
-
