@@ -1,7 +1,7 @@
 # Backend
 |  Master | Develop   |
 |---------|-----------|
-|  [![Build Status](https://travis-ci.org/projectsecure/backend.svg?branch=master)](https://travis-ci.org/projectsecure/backend) | [![Build Status](https://travis-ci.org/projectsecure/backend.svg?branch=develop)](https://travis-ci.org/projectsecure/backend) |
+|  [![Build Status](https://travis-ci.org/projectsecure/projectsecure-api.svg?branch=master)](https://travis-ci.org/projectsecure/projectsecure-api) | [![Build Status](https://travis-ci.org/projectsecure/projectsecure-api.svg?branch=develop)](https://travis-ci.org/projectsecure/projectsecure-api) |
 
 ## Development
 1. Install Docker and docker-compose
@@ -51,7 +51,3 @@ CHALLENGES = (
 
 **Note**: Don't forget to add tests for specialized behaviour in `challenges/tests/tests_models.py`.
 
-## TODO
-- Email confirmation
-- Email unique/required
-- PEP8 testing

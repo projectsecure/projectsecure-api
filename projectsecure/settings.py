@@ -9,7 +9,9 @@ JWT_SECRET_KEY = os.environ['JWT_SECRET_KEY']
 
 DEBUG = os.environ['DEBUG'] == 'TRUE'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    os.environ['HOST']
+]
 
 
 # Application definition
@@ -23,7 +25,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_extensions',
+<<<<<<< HEAD
     'challenges',
+=======
+>>>>>>> cfbaad89ade19b6393afe41dc6467d0f647b966d
 ]
 
 MIDDLEWARE = [
@@ -111,6 +116,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
