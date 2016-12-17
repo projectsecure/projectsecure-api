@@ -7,3 +7,9 @@ class FeedbackSerializer(serializers.HyperlinkedModelSerializer):
         model = Feedback
         fields = ('text',)
 
+    def create(self, validated_data):
+        obj = Feedback.objects.create(**validated_data)
+        obj.user = self.context['request'].user
+        obj.save()
+        return obj
+
