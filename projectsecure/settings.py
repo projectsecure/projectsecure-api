@@ -25,10 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'django_extensions',
-<<<<<<< HEAD
     'challenges',
-=======
->>>>>>> cfbaad89ade19b6393afe41dc6467d0f647b966d
 ]
 
 MIDDLEWARE = [
