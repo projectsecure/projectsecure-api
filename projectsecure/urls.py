@@ -10,4 +10,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'api/', include('users.urls')),
     url(r'api/', include('challenges.urls')),
+    url(r'api/', include('feedback.urls')),
 ]
