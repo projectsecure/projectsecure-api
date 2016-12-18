@@ -1,7 +1,7 @@
 from rest_framework.test import APITestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from .factories import UserFactory, DEFAULT_PASSWORD
+from users.tests.factories import UserFactory, DEFAULT_PASSWORD
 import datetime
 
 

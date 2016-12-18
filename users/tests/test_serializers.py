@@ -1,7 +1,7 @@
 from django.test import TestCase
 from users.tests.factories import UserFactory
 from users.serializers import UserSerializer
-from django.contrib.auth import get_user_model
+from users.models import User
 
 
 class TestUserSerializer(TestCase):
@@ -32,5 +32,5 @@ class TestUserSerializer(TestCase):
         print(serializer.errors)
         self.assertTrue(serializer.is_valid())
         serializer.save()
-        self.assertEqual(get_user_model().objects.count(), 1)
-        self.assertEqual(get_user_model().objects.first().username, data['username'])
+        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(User.objects.first().username, data['username'])
