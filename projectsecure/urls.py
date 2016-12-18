@@ -1,5 +1,7 @@
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 
 handler400 = 'projectsecure.utils.bad_request'
 handler403 = 'projectsecure.utils.permission_denied'
@@ -12,3 +14,6 @@ urlpatterns = [
     url(r'api/', include('challenges.urls')),
     url(r'api/', include('feedback.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

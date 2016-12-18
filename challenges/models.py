@@ -24,6 +24,7 @@ class Challenge(models.Model):
         title = None
         description = None
         steps = []
+        badge_icon_url = ''
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
@@ -107,6 +108,7 @@ class IdentityLeakCheckerChallenge(Challenge):
              TextStep(title='sdf', text='Starte die Challenge mit einem Klick auf den Button')),
             ('check_email', InputStep(input_title='Enter email', button_title='Check', title=''))
         ]
+        badge_icon_url = '/static/img/badge_identity_leak_checker.png'
 
     @register_step_handler()
     def check_email(self, request, *args, **kwargs):
@@ -141,6 +143,7 @@ class TorChallenge(Challenge):
              TextStep(title='', text='Starte die Challenge mit einem Klick auf den Button')),
             ('check_tor_connection', ButtonStep(button_title='Check tor connection', title=''))
         ]
+        badge_icon_url = '/static/img/badge_tor.png'
 
     @register_step_handler()
     def check_tor_connection(self, request):

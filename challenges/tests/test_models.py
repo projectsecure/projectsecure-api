@@ -23,7 +23,7 @@ class TestChallenge(TestCase):
                 self.assertEqual(type(step[0]), str)
                 self.assertIn(type(step[1]), [ButtonStep, InputStep, TextStep],
                               msg='Steps in {0} needs have a given type'.format(challenge))
-
+                
 
 class TestIdentityLeakCheckerChallenge(TestCase):
     def test_check_email(self):

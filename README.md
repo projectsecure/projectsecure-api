@@ -51,6 +51,12 @@ CHALLENGES = (
 
 **Note**: Don't forget to add tests for specialized behaviour in `challenges/tests/tests_models.py`.
 
+## Deployment
+```
+$ python3 manage.py migrate
+$ python3 manage.py collectstatic
+```
+
 ## TODO
 - Email confirmation
 - Email unique/required
