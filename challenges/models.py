@@ -31,9 +31,10 @@ class Challenge(models.Model):
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default=NOT_STARTED)
     message = models.CharField(max_length=140, blank=True, null=False)
 
-    required_completion_fields = []
-
     def get_registered_steps_handlers(self):
+        """
+        Gets all methods that are registered through the register_step_handler decorator.
+        """
         registered_step_handlers = {}
         for methodname in dir(self):
             # Ignore all errors
@@ -49,17 +50,30 @@ class Challenge(models.Model):
 
         return registered_step_handlers
 
-    def on_input(self, key, request):
-        step_func = self.get_registered_steps_handlers()[key]
+    def on_input(self, step_name, request):
+        step_func = self.get_registered_steps_handlers()[step_name]
         step_func(request)
 
     def mark_as_completed(self, raise_exception=False):
-        for completion_field in self.required_completion_fields:
-            if completion_field == Challenge.COMPLETED:
+        """
+        Marks a challenge as completed if all field ending with _status are also completed
+        """
+        fields = [field for field in self._meta.get_fields() if field.name.endswith('_status')]
+
+        for completion_field in fields:
+            # Look if the field is set to COMPLETED
+            if getattr(self, completion_field.name) == Challenge.COMPLETED:
                 continue
+
+            # We may want to raise an exception in case the function should be used without nesting
             if raise_exception:
                 raise NotCompletedError
+
+            # Return False if first status field occurs without value of COMPLETED
             return False
+
+        # Actually mark the challenge itself as completed
+        self.status = Challenge.COMPLETED
         return True
 
 
@@ -122,7 +136,6 @@ class IdentityLeakCheckerChallenge(Challenge):
 
     check_email_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
                                           default=Challenge.NOT_STARTED)
-    required_completion_fields = [check_email_status]
 
     @register_step_handler()
     def check_email(self, request, *args, **kwargs):
@@ -160,7 +173,6 @@ class TorChallenge(Challenge):
 
     check_tor_connection_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
                                                    default=Challenge.NOT_STARTED)
-    required_completion_fields = [check_tor_connection_status]
 
     @register_step_handler()
     def check_tor_connection(self, request):

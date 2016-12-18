@@ -85,3 +85,8 @@ class ChallengeCompleteView(APIView):
     def post(self, request, challenge_name):
         challenge_type = get_challenge(challenge_name)
         challenge = get_object_or_404(challenge_type, user=request.user)
+        challenge.mark_as_completed(raise_exception=True)
+        serializer = get_challenge_serializer(challenge_name)(instance=challenge)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

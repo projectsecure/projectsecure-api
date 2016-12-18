@@ -29,13 +29,19 @@ class TestChallenge(TestCase):
         for challenge_tuple in CHALLENGES:
             challenge = get_challenge_factory(challenge_tuple[0])
 
-            self.assertGreater(len(challenge.required_completion_fields), 0)
-
             self.assertFalse(challenge.mark_as_completed())
             self.assertFalse(challenge.status == Challenge.COMPLETED)
 
-            for completion_field in challenge.required_completion_fields:
-                completion_field = Challenge.COMPLETED
+            def convenience_complete(challenge):
+                completion_fields = [field for field in challenge._meta.get_fields() if
+                                     field.name.endswith('_status')]
+                self.assertGreater(len(completion_fields), 0,
+                                   msg="A challenge should have at least one step to be completed")
+                for completion_field in completion_fields:
+                    setattr(challenge, completion_field.name, Challenge.COMPLETED)
+                challenge.save()
+
+            convenience_complete(challenge)
 
             self.assertTrue(challenge.mark_as_completed())
             self.assertTrue(challenge.status == Challenge.COMPLETED)
