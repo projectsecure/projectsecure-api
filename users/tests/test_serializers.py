@@ -28,8 +28,6 @@ class TestUserSerializer(TestCase):
         data = {'username': 'ausername2348353', 'password': 'fsfsanbshfbsjkf', 'color': '#ffffff',
                 'full_name': 'a_name'}
         serializer = UserSerializer(data=data)
-        serializer.is_valid()
-        print(serializer.errors)
         self.assertTrue(serializer.is_valid())
         serializer.save()
         self.assertEqual(User.objects.count(), 1)
