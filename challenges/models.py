@@ -1,6 +1,6 @@
 from django.db import models
 import uuid
-from django.contrib.auth.models import User
+from django.conf import settings
 import requests
 
 
@@ -26,7 +26,7 @@ class Challenge(models.Model):
         steps = []
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True)
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default=NOT_STARTED)
     message = models.CharField(max_length=140, blank=True, null=False)
 
