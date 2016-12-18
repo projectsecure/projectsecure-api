@@ -28,15 +28,31 @@ class AnExampleChallenge(Challenge):
         ]
 ```
 
-Define a callback for the `a_button_step` step defined in `steps` above using the `register_step_handler()` decorator.
+Define a callback for the `a_button_step` step defined in `steps` above using the `register_step_handler()` decorator. You should also define a corresponding status field for a step.
+
+```python
+a_button_step_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
+                                       default=Challenge.NOT_STARTED)
+
+```
 
 ```python
 @register_step_handler()
 def a_button_step(self, request):
+    # Return early if step is already completed
+    if self.a_button_step_status == Challenge.COMPLETED:
+        return
+
     # Do some calculations or checks
+
+    if error_that_happened is not None:
+        self.a_button_step_status == Challenge.ERROR
+    else:
+        self.a_button_step_status == Challenge.COMPLETED
 
 ```
 
+If and only if all steps (so, their status fields) are marked as `COMPLETED`, the user can finish a challenge.
 
 Register a slug under with the challenge should be reachable.
 

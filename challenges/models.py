@@ -56,7 +56,7 @@ class Challenge(models.Model):
 
     def mark_as_completed(self, raise_exception=False):
         """
-        Marks a challenge as completed if all field ending with _status are also completed
+        Marks a challenge as completed if all fields ending with _status are also completed
         """
         fields = [field for field in self._meta.get_fields() if field.name.endswith('_status')]
 
