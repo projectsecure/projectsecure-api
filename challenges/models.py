@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.auth.models import User
 import requests
+from challenges.exceptions import NotCompletedError
 
 
 class Challenge(models.Model):
@@ -30,6 +31,8 @@ class Challenge(models.Model):
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default=NOT_STARTED)
     message = models.CharField(max_length=140, blank=True, null=False)
 
+    required_completion_fields = []
+
     def get_registered_steps_handlers(self):
         registered_step_handlers = {}
         for methodname in dir(self):
@@ -49,6 +52,15 @@ class Challenge(models.Model):
     def on_input(self, key, request):
         step_func = self.get_registered_steps_handlers()[key]
         step_func(request)
+
+    def mark_as_completed(self, raise_exception=False):
+        for completion_field in self.required_completion_fields:
+            if completion_field == Challenge.COMPLETED:
+                continue
+            if raise_exception:
+                raise NotCompletedError
+            return False
+        return True
 
 
 def register_step_handler():
@@ -108,6 +120,10 @@ class IdentityLeakCheckerChallenge(Challenge):
             ('check_email', InputStep(input_title='Enter email', button_title='Check', title=''))
         ]
 
+    check_email_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
+                                          default=Challenge.NOT_STARTED)
+    required_completion_fields = [check_email_status]
+
     @register_step_handler()
     def check_email(self, request, *args, **kwargs):
         """
@@ -115,7 +131,7 @@ class IdentityLeakCheckerChallenge(Challenge):
 
         Returns True if web request was successful
         """
-        if self.status == Challenge.COMPLETED:
+        if self.check_email_status == Challenge.COMPLETED:
             return
 
         email = request.data.get('input')
@@ -123,9 +139,9 @@ class IdentityLeakCheckerChallenge(Challenge):
         response = requests.post(url, data={'email': email})
 
         if response.ok:
-            self.status = Challenge.COMPLETED
+            self.check_email_status = Challenge.COMPLETED
         else:
-            self.status = Challenge.ERROR
+            self.check_email_status = Challenge.ERROR
 
 
 class TorChallenge(Challenge):
@@ -142,6 +158,10 @@ class TorChallenge(Challenge):
             ('check_tor_connection', ButtonStep(button_title='Check tor connection', title=''))
         ]
 
+    check_tor_connection_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
+                                                   default=Challenge.NOT_STARTED)
+    required_completion_fields = [check_tor_connection_status]
+
     @register_step_handler()
     def check_tor_connection(self, request):
         """
@@ -149,7 +169,7 @@ class TorChallenge(Challenge):
 
         Returns True if given IP is Tor exit node
         """
-        if self.status == Challenge.COMPLETED:
+        if self.check_tor_connection_status == Challenge.COMPLETED:
             return
 
         ip = request.META.get('REMOTE_ADDR')
@@ -157,9 +177,9 @@ class TorChallenge(Challenge):
         response = requests.get(url)
 
         if ip in (response.text or ''):
-            self.status = Challenge.COMPLETED
+            self.check_tor_connection_status = Challenge.COMPLETED
         else:
-            self.status = Challenge.ERROR
+            self.check_tor_connection_status = Challenge.ERROR
 
 
 IDENTITY_LEAK_CECKER_CHALLENGE = 'identity_leak_checker'

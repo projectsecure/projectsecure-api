@@ -79,3 +79,9 @@ class ChallengesListView(APIView):
         data = [{'slug': challenge[0], 'title': challenge[1].ChallengeMeta.title,
                  'description': challenge[1].ChallengeMeta.description} for challenge in CHALLENGES]
         return Response(data)
+
+
+class ChallengeCompleteView(APIView):
+    def post(self, request, challenge_name):
+        challenge_type = get_challenge(challenge_name)
+        challenge = get_object_or_404(challenge_type, user=request.user)

@@ -10,6 +10,8 @@ urlpatterns = [
         name='challenges-step-list'),
     url(r'^challenges/(?P<challenge_name>[a-z_]+)/start$', ChallengeStartView.as_view(),
         name='challenge-start'),
+    url(r'^challenges/(?P<challenge_name>[a-z_]+)/complete', ChallengeStartView.as_view(),
+        name='challenge-complete'),
     url(r'^challenges/(?P<challenge_name>[a-z_]+)$', ChallengeDetailView.as_view(),
         name='challenge-detail'),
     url(r'^challenges$', ChallengesListView.as_view(), name='challenge-list'),

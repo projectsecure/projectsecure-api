@@ -1,15 +1,11 @@
 from rest_framework.test import APITestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from challenges.tests.factories import CHALLENGE_FACTORIES, ChallengeFactory
+from challenges.tests.factories import get_challenge_factory
 from users.tests.factories import UserFactory
 from challenges.models import CHALLENGES, Challenge
 from django.db import transaction
 from challenges.models import ButtonStep, InputStep
-
-
-def get_challenge_factory(name) -> ChallengeFactory:
-    return dict(CHALLENGE_FACTORIES)[name]()
 
 
 class TestChallengeDetailView(APITestCase):
@@ -176,3 +172,17 @@ class TestChallengeStartView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
                          msg='Challenge should not be found for {0} type'.format(challenge_name))
         self.assertEqual(response.json(), {'error': 'Not found.'})
+
+
+class TestChallengeCompleteView(APITestCase):
+    def test_complete_challenge(self):
+        pass
+
+    def test_complete_challenge_not_found_if_not_started(self):
+        pass
+
+    def test_complete_challenge_not_authorized(self):
+        pass
+
+    def test_complete_challenge_already_completed(self):
+        pass
