@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
             name='IdentityLeakCheckerChallenge',
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('status', models.CharField(choices=[('NOT_STARTED', 'Not started'), ('IN_PROGRESS', 'In progress'), ('DONE', 'Done'), ('ERROR', 'Error')], default='NOT_STARTED', max_length=11)),
+                ('status', models.CharField(choices=[('NOT_STARTED', 'Not started'), ('IN_PROGRESS', 'In progress'), ('COMPLETED', 'Completed'), ('ERROR', 'Error')], default='NOT_STARTED', max_length=11)),
                 ('message', models.CharField(blank=True, max_length=140)),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
             name='TorChallenge',
             fields=[
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('status', models.CharField(choices=[('NOT_STARTED', 'Not started'), ('IN_PROGRESS', 'In progress'), ('DONE', 'Done'), ('ERROR', 'Error')], default='NOT_STARTED', max_length=11)),
+                ('status', models.CharField(choices=[('NOT_STARTED', 'Not started'), ('IN_PROGRESS', 'In progress'), ('COMPLETED', 'Completed'), ('ERROR', 'Error')], default='NOT_STARTED', max_length=11)),
                 ('message', models.CharField(blank=True, max_length=140)),
                 ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],

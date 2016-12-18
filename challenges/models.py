@@ -7,13 +7,13 @@ import requests
 class Challenge(models.Model):
     NOT_STARTED = "NOT_STARTED"
     IN_PROGRESS = "IN_PROGRESS"
-    DONE = "DONE"
+    COMPLETED = "COMPLETED"
     ERROR = "ERROR"
 
     STATUS_CHOICES = (
         (NOT_STARTED, 'Not started'),
         (IN_PROGRESS, 'In progress'),
-        (DONE, 'Done'),
+        (COMPLETED, 'Completed'),
         (ERROR, 'Error'),
     )
 
@@ -115,7 +115,7 @@ class IdentityLeakCheckerChallenge(Challenge):
 
         Returns True if web request was successful
         """
-        if self.status == Challenge.DONE:
+        if self.status == Challenge.COMPLETED:
             return
 
         email = request.data.get('input')
@@ -123,7 +123,7 @@ class IdentityLeakCheckerChallenge(Challenge):
         response = requests.post(url, data={'email': email})
 
         if response.ok:
-            self.status = Challenge.DONE
+            self.status = Challenge.COMPLETED
         else:
             self.status = Challenge.ERROR
 
@@ -149,7 +149,7 @@ class TorChallenge(Challenge):
 
         Returns True if given IP is Tor exit node
         """
-        if self.status == Challenge.DONE:
+        if self.status == Challenge.COMPLETED:
             return
 
         ip = request.META.get('REMOTE_ADDR')
@@ -157,7 +157,7 @@ class TorChallenge(Challenge):
         response = requests.get(url)
 
         if ip in (response.text or ''):
-            self.status = Challenge.DONE
+            self.status = Challenge.COMPLETED
         else:
             self.status = Challenge.ERROR
 
