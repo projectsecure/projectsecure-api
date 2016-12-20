@@ -1,10 +1,9 @@
 from rest_framework import viewsets
 from rest_framework.decorators import list_route
-from django.contrib.auth.models import User
-from .serializers import UserSerializer
+from users.serializers import UserSerializer
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.permissions import AllowAny
+from users.models import User
 
 
 class UserViewSet(viewsets.GenericViewSet):
@@ -19,8 +18,7 @@ class UserViewSet(viewsets.GenericViewSet):
     @list_route(methods=['post'], permission_classes=[AllowAny])
     def register(self, request):
         serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+

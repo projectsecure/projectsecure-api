@@ -1,7 +1,7 @@
 from rest_framework.test import APITestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from .factories import UserFactory, DEFAULT_PASSWORD
+from users.tests.factories import UserFactory, DEFAULT_PASSWORD
 import datetime
 
 
@@ -23,8 +23,8 @@ class TestUserViewSet(APITestCase):
         response = self.client.get(reverse('user-me'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'username': user.username, 'last_name': user.last_name,
-                                           'first_name': user.first_name, 'email': user.email})
+        self.assertEqual(response.json(), {'username': user.username, 'full_name': user.full_name,
+                                           'color': user.color, 'email': user.email})
 
     def test_me_unauthenticated(self):
         response = self.client.get(reverse('user-me'))
@@ -37,8 +37,8 @@ class TestUserViewSet(APITestCase):
             'username': 'anewuser',
             'password': '1randompassword',
             'email': 'anewuser@test.de',
-            'first_name': 'A New',
-            'last_name': 'User'
+            'full_name': 'Peter Parker',
+            'color': '#ffffff'
         }
         response = self.client.post(reverse('user-register'), data=data)
 
@@ -52,8 +52,8 @@ class TestUserViewSet(APITestCase):
             'username': user.username,
             'password': '1randompassword',
             'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name
+            'color': user.color,
+            'full_name': user.full_name
         }
         response = self.client.post(reverse('user-register'), data=data)
 
@@ -66,7 +66,9 @@ class TestUserViewSet(APITestCase):
         response = self.client.post(reverse('user-register'), data=data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'password': ['This field is required.'],
+        self.assertEqual(response.json(), {'color': ['This field is required.'],
+                                           'full_name': ['This field is required.'],
+                                           'password': ['This field is required.'],
                                            'username': ['This field is required.']})
 
 

@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
     'rest_framework',
     'django_extensions',
     'challenges',
@@ -125,3 +126,5 @@ JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
     'JWT_SECRET_KEY': JWT_SECRET_KEY,
 }
+
+AUTH_USER_MODEL = 'users.User'

@@ -34,5 +34,4 @@ class TestSendFeedbackView(APITestCase):
         response = self.client.post(reverse('feedback'))
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(),
-                         {'error': None, 'text': ['This field is required.']})
+        self.assertEqual(response.json(), {'text': ['This field is required.']})

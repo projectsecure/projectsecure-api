@@ -10,7 +10,7 @@ from django.db import IntegrityError
 from rest_framework.status import HTTP_409_CONFLICT
 
 
-def get_challenge(name) -> 'Challenge':
+def get_challenge(name):
     challenge = dict(CHALLENGES).get(name, None)
     if challenge is None:
         raise NotFound
