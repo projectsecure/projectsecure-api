@@ -28,3 +28,7 @@ CHALLENGE_FACTORIES = (
     (IDENTITY_LEAK_CECKER_CHALLENGE, IdentityLeakCheckerChallengeFactory),
     (TOR_CHALLENGE, TorChallengeFactory)
 )
+
+
+def get_challenge_factory(name) -> ChallengeFactory:
+    return dict(CHALLENGE_FACTORIES)[name]()
