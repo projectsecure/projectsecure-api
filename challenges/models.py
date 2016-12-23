@@ -2,7 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.auth.models import User
 import requests
-from challenges.exceptions import NotCompletedError
+from challenges.exceptions import NotCompletedError, AlreadyCompletedError
 
 
 class Challenge(models.Model):
@@ -58,6 +58,12 @@ class Challenge(models.Model):
         """
         Marks a challenge as completed if all fields ending with _status are also completed
         """
+        # Challenge can be only completed once
+        if self.status == Challenge.COMPLETED:
+            if raise_exception:
+                raise AlreadyCompletedError
+            return True
+
         fields = [field for field in self._meta.get_fields() if field.name.endswith('_status')]
 
         for completion_field in fields:

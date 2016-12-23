@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
-from rest_framework.status import HTTP_409_CONFLICT
+from challenges.exceptions import AlreadyStartedError
 
 
 def get_challenge(name) -> 'Challenge':
@@ -66,7 +66,7 @@ class ChallengeStartView(APIView):
         try:
             challenge.save()
         except IntegrityError:
-            return Response({'error': 'Challenge was already started.'}, status=HTTP_409_CONFLICT)
+            raise AlreadyStartedError
 
         serializer = get_challenge_serializer(challenge_name)(instance=challenge)
         return Response(serializer.data)
@@ -86,7 +86,5 @@ class ChallengeCompleteView(APIView):
         challenge_type = get_challenge(challenge_name)
         challenge = get_object_or_404(challenge_type, user=request.user)
         challenge.mark_as_completed(raise_exception=True)
-        serializer = get_challenge_serializer(challenge_name)(instance=challenge)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
+        challenge.save()
+        return Response({})

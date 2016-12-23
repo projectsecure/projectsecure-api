@@ -3,6 +3,7 @@ from challenges.models import CHALLENGES, ButtonStep, Step, TextStep, InputStep,
 from challenges.tests.factories import IdentityLeakCheckerChallengeFactory, TorChallengeFactory, \
     get_challenge_factory
 from unittest.mock import patch, Mock, PropertyMock
+from challenges.tests.helpers import convenience_complete
 
 
 class TestChallenge(TestCase):
@@ -31,15 +32,6 @@ class TestChallenge(TestCase):
 
             self.assertFalse(challenge.mark_as_completed())
             self.assertFalse(challenge.status == Challenge.COMPLETED)
-
-            def convenience_complete(challenge):
-                completion_fields = [field for field in challenge._meta.get_fields() if
-                                     field.name.endswith('_status')]
-                self.assertGreater(len(completion_fields), 0,
-                                   msg="A challenge should have at least one step to be completed")
-                for completion_field in completion_fields:
-                    setattr(challenge, completion_field.name, Challenge.COMPLETED)
-                challenge.save()
 
             convenience_complete(challenge)
 
