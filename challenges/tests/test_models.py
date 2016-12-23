@@ -1,7 +1,9 @@
 from django.test import TestCase
-from challenges.models import CHALLENGES, ButtonStep, Step, TextStep, InputStep
-from challenges.tests.factories import IdentityLeakCheckerChallengeFactory, TorChallengeFactory
+from challenges.models import CHALLENGES, ButtonStep, Step, TextStep, InputStep, Challenge
+from challenges.tests.factories import IdentityLeakCheckerChallengeFactory, TorChallengeFactory, \
+    get_challenge_factory
 from unittest.mock import patch, Mock, PropertyMock
+from challenges.tests.helpers import convenience_complete
 
 
 class TestChallenge(TestCase):
@@ -23,6 +25,18 @@ class TestChallenge(TestCase):
                 self.assertEqual(type(step[0]), str)
                 self.assertIn(type(step[1]), [ButtonStep, InputStep, TextStep],
                               msg='Steps in {0} needs have a given type'.format(challenge))
+
+    def test_mark_as_completed(self):
+        for challenge_tuple in CHALLENGES:
+            challenge = get_challenge_factory(challenge_tuple[0])
+
+            self.assertFalse(challenge.mark_as_completed())
+            self.assertFalse(challenge.status == Challenge.COMPLETED)
+
+            convenience_complete(challenge)
+
+            self.assertTrue(challenge.mark_as_completed())
+            self.assertTrue(challenge.status == Challenge.COMPLETED)
 
 
 class TestIdentityLeakCheckerChallenge(TestCase):

@@ -96,7 +96,7 @@ class TestAuthRefreshJWTView(APITestCase):
         token = create_token(user)
         data = {'token': token}
         response = self.client.post(reverse('auth-jwt-refresh'), data=data)
-        print(response.json())
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json().get('token') is not None)
 
