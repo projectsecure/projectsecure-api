@@ -1,11 +1,12 @@
 from rest_framework.test import APITestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from challenges.tests.factories import CHALLENGE_FACTORIES, ChallengeFactory
+from challenges.tests.factories import ChallengeFactory
 from users.tests.factories import UserFactory
-from challenges.models import CHALLENGES, Challenge
+from challenges.models import Challenge
 from django.db import transaction
 from challenges.models import ButtonStep, InputStep
+from challenges.config import CHALLENGES, CHALLENGE_FACTORIES
 
 
 def get_challenge_factory(name) -> ChallengeFactory:

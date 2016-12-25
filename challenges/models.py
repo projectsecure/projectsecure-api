@@ -48,6 +48,7 @@ class Challenge(models.Model):
     def on_input(self, key, request):
         step_func = self.get_registered_steps_handlers()[key]
         step_func(request)
+        self.save()
 
 
 def register_step_handler():

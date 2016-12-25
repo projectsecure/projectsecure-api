@@ -1,5 +1,5 @@
 from django.test import TestCase
-from challenges.serializers import CHALLENGE_SERIALIZERS
+from challenges.config import CHALLENGE_SERIALIZERS
 
 
 class TestChallengeSerializers(TestCase):

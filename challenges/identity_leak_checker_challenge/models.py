@@ -1,5 +1,5 @@
 import requests
-from challenges.models.challenge import Challenge, TextStep, InputStep, register_step_handler
+from challenges.models import Challenge, TextStep, InputStep, register_step_handler
 
 
 class IdentityLeakCheckerChallenge(Challenge):

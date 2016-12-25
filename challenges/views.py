@@ -1,6 +1,5 @@
-from challenges.serializers import CHALLENGE_SERIALIZERS
 from rest_framework.permissions import AllowAny
-from challenges.models import CHALLENGES
+from challenges.config import CHALLENGES, CHALLENGE_SERIALIZERS
 from rest_framework.response import Response
 from challenges.models import Challenge
 from rest_framework.views import APIView
@@ -10,7 +9,7 @@ from django.db import IntegrityError
 from rest_framework.status import HTTP_409_CONFLICT
 
 
-def get_challenge(name) -> 'Challenge':
+def get_challenge(name):
     challenge = dict(CHALLENGES).get(name, None)
     if challenge is None:
         raise NotFound

@@ -1,5 +1,5 @@
 import requests
-from challenges.models.challenge import Challenge, TextStep, ButtonStep, register_step_handler
+from challenges.models import Challenge, TextStep, ButtonStep, register_step_handler
 
 
 class TorChallenge(Challenge):
