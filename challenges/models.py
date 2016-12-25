@@ -1,18 +1,19 @@
 from django.db import models
 import uuid
-from django.contrib.auth.models import User
+from django.conf import settings
+from challenges.exceptions import NotCompletedError, AlreadyCompletedError
 
 
 class Challenge(models.Model):
     NOT_STARTED = "NOT_STARTED"
     IN_PROGRESS = "IN_PROGRESS"
-    DONE = "DONE"
+    COMPLETED = "COMPLETED"
     ERROR = "ERROR"
 
     STATUS_CHOICES = (
         (NOT_STARTED, 'Not started'),
         (IN_PROGRESS, 'In progress'),
-        (DONE, 'Done'),
+        (COMPLETED, 'Completed'),
         (ERROR, 'Error'),
     )
 
@@ -25,11 +26,14 @@ class Challenge(models.Model):
         steps = []
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True)
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default=NOT_STARTED)
     message = models.CharField(max_length=140, blank=True, null=False)
 
     def get_registered_steps_handlers(self):
+        """
+        Gets all methods that are registered through the register_step_handler decorator.
+        """
         registered_step_handlers = {}
         for methodname in dir(self):
             # Ignore all errors
@@ -45,10 +49,38 @@ class Challenge(models.Model):
 
         return registered_step_handlers
 
-    def on_input(self, key, request):
-        step_func = self.get_registered_steps_handlers()[key]
+    def on_input(self, step_name, request):
+        step_func = self.get_registered_steps_handlers()[step_name]
         step_func(request)
         self.save()
+
+    def mark_as_completed(self, raise_exception=False):
+        """
+        Marks a challenge as completed if all fields ending with _status are also completed
+        """
+        # Challenge can be only completed once
+        if self.status == Challenge.COMPLETED:
+            if raise_exception:
+                raise AlreadyCompletedError
+            return True
+
+        fields = [field for field in self._meta.get_fields() if field.name.endswith('_status')]
+
+        for completion_field in fields:
+            # Look if the field is set to COMPLETED
+            if getattr(self, completion_field.name) == Challenge.COMPLETED:
+                continue
+
+            # We may want to raise an exception in case the function should be used without nesting
+            if raise_exception:
+                raise NotCompletedError
+
+            # Return False if first status field occurs without value of COMPLETED
+            return False
+
+        # Actually mark the challenge itself as completed
+        self.status = Challenge.COMPLETED
+        return True
 
 
 def register_step_handler():
@@ -92,3 +124,4 @@ class InputStep(Step):
         json = super(InputStep, self).to_json()
         json.update({'input_title': self.input_title, 'button_title': self.button_title})
         return json
+

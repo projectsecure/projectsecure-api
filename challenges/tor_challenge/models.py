@@ -1,5 +1,6 @@
 import requests
 from challenges.models import Challenge, TextStep, ButtonStep, register_step_handler
+from django.db import models
 
 
 class TorChallenge(Challenge):
@@ -16,6 +17,9 @@ class TorChallenge(Challenge):
             ('check_tor_connection', ButtonStep(button_title='Check tor connection', title=''))
         ]
 
+    check_tor_connection_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
+                                                   default=Challenge.NOT_STARTED)
+
     @register_step_handler()
     def check_tor_connection(self, request):
         """
@@ -23,7 +27,7 @@ class TorChallenge(Challenge):
 
         Returns True if given IP is Tor exit node
         """
-        if self.status == Challenge.DONE:
+        if self.check_tor_connection_status == Challenge.COMPLETED:
             return
 
         ip = request.META.get('REMOTE_ADDR')
@@ -31,8 +35,8 @@ class TorChallenge(Challenge):
         response = requests.get(url)
 
         if ip in (response.text or ''):
-            self.status = Challenge.DONE
+            self.check_tor_connection_status = Challenge.COMPLETED
         else:
-            self.status = Challenge.ERROR
+            self.check_tor_connection_status = Challenge.ERROR
 
 

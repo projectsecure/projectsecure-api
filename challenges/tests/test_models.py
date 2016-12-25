@@ -1,6 +1,8 @@
 from django.test import TestCase
-from challenges.models import ButtonStep, Step, TextStep, InputStep
 from challenges.config import CHALLENGES
+from challenges.models import ButtonStep, Step, TextStep, InputStep, Challenge
+from challenges.tests.helpers import convenience_complete
+from challenges.tests.helpers import get_challenge_factory
 
 
 class TestChallenge(TestCase):
@@ -22,6 +24,18 @@ class TestChallenge(TestCase):
                 self.assertEqual(type(step[0]), str)
                 self.assertIn(type(step[1]), [ButtonStep, InputStep, TextStep],
                               msg='Steps in {0} needs have a given type'.format(challenge))
+
+    def test_mark_as_completed(self):
+        for challenge_tuple in CHALLENGES:
+            challenge = get_challenge_factory(challenge_tuple[0])
+
+            self.assertFalse(challenge.mark_as_completed())
+            self.assertFalse(challenge.status == Challenge.COMPLETED)
+
+            convenience_complete(challenge)
+
+            self.assertTrue(challenge.mark_as_completed())
+            self.assertTrue(challenge.status == Challenge.COMPLETED)
 
 
 class TestStep(TestCase):

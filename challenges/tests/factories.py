@@ -1,9 +1,6 @@
 import factory
 from challenges.models import Challenge
-from faker import Factory as FakeFactory
 from users.tests.factories import UserFactory
-
-fake = FakeFactory.create()
 
 
 class ChallengeFactory(factory.DjangoModelFactory):

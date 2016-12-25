@@ -1,5 +1,6 @@
 import requests
 from challenges.models import Challenge, TextStep, InputStep, register_step_handler
+from django.db import models
 
 
 class IdentityLeakCheckerChallenge(Challenge):
@@ -16,6 +17,9 @@ class IdentityLeakCheckerChallenge(Challenge):
             ('check_email', InputStep(input_title='Enter email', button_title='Check', title=''))
         ]
 
+    check_email_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
+                                          default=Challenge.NOT_STARTED)
+
     @register_step_handler()
     def check_email(self, request, *args, **kwargs):
         """
@@ -23,7 +27,7 @@ class IdentityLeakCheckerChallenge(Challenge):
 
         Returns True if web request was successful
         """
-        if self.status == Challenge.DONE:
+        if self.check_email_status == Challenge.COMPLETED:
             return
 
         email = request.data.get('input')
@@ -31,6 +35,6 @@ class IdentityLeakCheckerChallenge(Challenge):
         response = requests.post(url, data={'email': email})
 
         if response.ok:
-            self.status = Challenge.DONE
+            self.check_email_status = Challenge.COMPLETED
         else:
-            self.status = Challenge.ERROR
+            self.check_email_status = Challenge.ERROR
