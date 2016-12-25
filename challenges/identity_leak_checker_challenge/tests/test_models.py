@@ -1,12 +1,6 @@
-from challenges.identity_leak_checker_challenge.models import IdentityLeakCheckerChallenge
-from challenges.tests.factories import ChallengeFactory
+from challenges.identity_leak_checker_challenge.tests.factories import IdentityLeakCheckerChallengeFactory
 from django.test import TestCase
 from unittest.mock import patch, Mock, PropertyMock
-
-
-class IdentityLeakCheckerChallengeFactory(ChallengeFactory):
-    class Meta:
-        model = IdentityLeakCheckerChallenge
 
 
 class TestIdentityLeakCheckerChallenge(TestCase):

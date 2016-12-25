@@ -8,4 +8,4 @@ class TorChallengeSerializer(serializers.HyperlinkedModelSerializer, ChallengeSe
 
     class Meta:
         model = TorChallenge
-        fields = ChallengeSerializerMixin.Meta.fields
+        fields = ChallengeSerializerMixin.Meta.fields + ('check_tor_connection_status', )

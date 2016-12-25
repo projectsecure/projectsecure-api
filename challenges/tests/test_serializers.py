@@ -1,5 +1,5 @@
 from django.test import TestCase
-from challenges.config import CHALLENGE_SERIALIZERS
+from challenges.registry import CHALLENGE_SERIALIZERS
 
 
 class TestChallengeSerializers(TestCase):
@@ -9,3 +9,4 @@ class TestChallengeSerializers(TestCase):
 
         self.assertEqual(len(serializers_list), len(serializers_dict.keys()),
                          msg='Two challenges are violating the unique identifier constraint')
+# TODO: Test general serializers/ meta method!!!

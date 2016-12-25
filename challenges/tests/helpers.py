@@ -1,6 +1,6 @@
 from challenges.models import Challenge
 from challenges.tests.factories import ChallengeFactory
-from challenges.config import CHALLENGE_FACTORIES
+from challenges.registry import CHALLENGE_FACTORIES
 
 
 def convenience_complete(challenge):

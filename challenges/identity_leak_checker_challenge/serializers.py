@@ -9,4 +9,4 @@ class IdentityLeakCheckerChallengeSerializer(serializers.HyperlinkedModelSeriali
 
     class Meta:
         model = IdentityLeakCheckerChallenge
-        fields = ChallengeSerializerMixin.Meta.fields
+        fields = ChallengeSerializerMixin.Meta.fields + ('check_email_status',)

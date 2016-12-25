@@ -1,12 +1,6 @@
-from challenges.tor_challenge.models import TorChallenge
-from challenges.tests.factories import ChallengeFactory
 from django.test import TestCase
 from unittest.mock import patch, Mock, PropertyMock
-
-
-class TorChallengeFactory(ChallengeFactory):
-    class Meta:
-        model = TorChallenge
+from challenges.tor_challenge.tests.factories import TorChallengeFactory
 
 
 class TestTorChallenge(TestCase):

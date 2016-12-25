@@ -1,33 +1,12 @@
 from rest_framework.permissions import AllowAny
-from challenges.config import CHALLENGES, CHALLENGE_SERIALIZERS
+from challenges.registry import CHALLENGES
 from rest_framework.response import Response
 from challenges.models import Challenge
 from rest_framework.views import APIView
-from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from challenges.exceptions import AlreadyStartedError
-
-
-def get_challenge(name):
-    challenge = dict(CHALLENGES).get(name, None)
-    if challenge is None:
-        raise NotFound
-    return challenge
-
-
-def get_challenge_serializer(name):
-    """
-    Returns a serialzer object based on a challenge name.
-
-    Raises: NotFound - Error if challenge name was not found
-
-    Returns: ChallengeSerializer - A specialized serializer for a challenge
-    """
-    serializer = dict(CHALLENGE_SERIALIZERS).get(name, None)
-    if serializer is None:
-        raise NotFound
-    return serializer
+from challenges.helpers import get_challenge, get_challenge_serializer
 
 
 class ChallengeDetailView(APIView):
@@ -36,16 +15,6 @@ class ChallengeDetailView(APIView):
         challenge = get_object_or_404(challenge_type, user=request.user)
         serializer = get_challenge_serializer(challenge_name)(instance=challenge)
         return Response(serializer.data)
-
-
-class ChallengeStepsView(APIView):
-    permission_classes = (AllowAny,)
-
-    def get(self, _, challenge_name):
-        steps = get_challenge(challenge_name).ChallengeMeta.steps
-        data = [{'name': step[0], 'type': type(step[1]).__name__, 'options': step[1].to_json()} for
-                step in steps]
-        return Response(data)
 
 
 class ChallengeStepUpdateView(APIView):

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from challenges.config import CHALLENGES
+from challenges.registry import CHALLENGES
 from challenges.models import ButtonStep, Step, TextStep, InputStep, Challenge
 from challenges.tests.helpers import convenience_complete
 from challenges.tests.helpers import get_challenge_factory

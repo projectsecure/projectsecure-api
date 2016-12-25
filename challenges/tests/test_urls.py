@@ -24,11 +24,6 @@ class TestChallengeUrls(TestCase):
 
 
 class TestChallengeStepUrls(TestCase):
-    def test_challenge_step_list_url(self):
-        challenge_name = 'a_challenge'
-        url = reverse('challenges-step-list', kwargs={'challenge_name': challenge_name})
-        self.assertEqual(url, '/api/challenges/{0}/steps'.format(challenge_name))
-
     def test_challenge_step_detail_url(self):
         challenge_name = 'a_challenge'
         step_name = 'a_step'
