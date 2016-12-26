@@ -82,6 +82,12 @@ class Challenge(models.Model):
         self.status = Challenge.COMPLETED
         return True
 
+    def status_for_step(self, step_name):
+        for field in self._meta.get_fields():
+            if field.name == '{0}_status'.format(step_name):
+                return getattr(self, field.name)
+        return None
+
 
 def register_step_handler():
     def decorator(func):

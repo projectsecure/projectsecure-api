@@ -1,12 +1,23 @@
 from django.test import TestCase
-from challenges.registry import CHALLENGE_SERIALIZERS
+from challenges.registry import CHALLENGES
+from challenges.helpers import get_challenge_serializer
 
 
 class TestChallengeSerializers(TestCase):
-    def test_challenges_list_unique(self):
-        serializers_list = list(CHALLENGE_SERIALIZERS)
-        serializers_dict = dict(CHALLENGE_SERIALIZERS)
+    def test_serialize_one(self):
+        for challenge_type in CHALLENGES:
+            challenge = challenge_type[1]()
 
-        self.assertEqual(len(serializers_list), len(serializers_dict.keys()),
-                         msg='Two challenges are violating the unique identifier constraint')
-# TODO: Test general serializers/ meta method!!!
+            serializer = get_challenge_serializer(challenge_type[0])(instance=challenge)
+            data = serializer.data
+
+            self.assertEqual(data.pop('title'), challenge.ChallengeMeta.title)
+            self.assertEqual(data.pop('description'), challenge.ChallengeMeta.description)
+            self.assertEqual(data.pop('status'), challenge.status)
+            self.assertEqual(data.pop('message'), challenge.message)
+            for step in data.pop('steps'):
+                self.assertContains(step, 'name')
+                self.assertContains(step, 'status')
+                self.assertContains(step, 'type')
+                self.assertContains(step, 'options')
+            self.assertEqual(len(data), 0)
