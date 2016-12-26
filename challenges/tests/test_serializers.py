@@ -16,8 +16,9 @@ class TestChallengeSerializers(TestCase):
             self.assertEqual(data.pop('status'), challenge.status)
             self.assertEqual(data.pop('message'), challenge.message)
             for step in data.pop('steps'):
-                self.assertContains(step, 'name')
-                self.assertContains(step, 'status')
-                self.assertContains(step, 'type')
-                self.assertContains(step, 'options')
+                keys = step.keys()
+                self.assertIn('name', keys)
+                self.assertIn('status', keys)
+                self.assertIn('type', keys)
+                self.assertIn('options', keys)
             self.assertEqual(len(data), 0)

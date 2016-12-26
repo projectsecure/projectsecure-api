@@ -83,6 +83,7 @@ class Challenge(models.Model):
         return True
 
     def status_for_step(self, step_name):
+        # TODO: Test this thing here
         for field in self._meta.get_fields():
             if field.name == '{0}_status'.format(step_name):
                 return getattr(self, field.name)
