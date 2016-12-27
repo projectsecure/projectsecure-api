@@ -7,7 +7,7 @@ from django.db import transaction
 from challenges.models import ButtonStep, InputStep
 from challenges.registry import CHALLENGES
 from challenges.tests.helpers import convenience_complete, get_challenge_factory
-from challenges.helpers import get_challenge_serializer
+from challenges.serializers import ChallengeSerializer
 
 
 class TestChallengeDetailView(APITestCase):
@@ -20,7 +20,7 @@ class TestChallengeDetailView(APITestCase):
             response = self.client.get(
                 reverse('challenge-detail', kwargs={'challenge_name': challenge_type[0]}))
 
-            serializer = get_challenge_serializer(challenge_type[0])(instance=challenge)
+            serializer = ChallengeSerializer(instance=challenge)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), serializer.data)
@@ -47,13 +47,20 @@ class TestChallengeDetailView(APITestCase):
 
 class TestChallengesListView(APITestCase):
     def test_retrieve_all_challenges(self):
+        user = UserFactory()
+
+        self.client.force_authenticate(user=user)
         response = self.client.get(reverse('challenge-list'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.json(), {})
+
+    def retrieve_all_challenges_not_authorized(self):
+        response = self.client.get(reverse('challenge-list'))
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json(),
-                         [{'title': challenge[1].ChallengeMeta.title,
-                           'description': challenge[1].ChallengeMeta.description,
-                           'slug': challenge[0]} for challenge in CHALLENGES])
+                         {'error': 'Authentication credentials were not provided.'})
 
 
 class TestChallengeStepUpdateView(APITestCase):
@@ -104,11 +111,11 @@ class TestChallengeStartView(APITestCase):
         for challenge_type in CHALLENGES:
             self.client.force_authenticate(user=user)
 
-            response = self.client.post(
-                reverse('challenge-start', kwargs={'challenge_name': challenge_type[0]}))
-
+            with transaction.atomic():
+                response = self.client.post(
+                    reverse('challenge-start', kwargs={'challenge_name': challenge_type[0]}))
             challenge = challenge_type[1].objects.first()
-            serializer = get_challenge_serializer(challenge_type[0])(instance=challenge)
+            serializer = ChallengeSerializer(instance=challenge)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
             self.assertEqual(response.json(), serializer.data)

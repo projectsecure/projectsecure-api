@@ -1,5 +1,6 @@
 from rest_framework.exceptions import NotFound
-from challenges.registry import CHALLENGES, CHALLENGE_SERIALIZERS
+from challenges.registry import CHALLENGES
+import re
 
 
 def get_challenge(name) -> type:
@@ -9,15 +10,6 @@ def get_challenge(name) -> type:
     return challenge
 
 
-def get_challenge_serializer(name) -> type:
-    """
-    Returns a serialzer object based on a challenge name.
-
-    Raises: NotFound - Error if challenge name was not found
-
-    Returns: ChallengeSerializer - A specialized serializer for a challenge
-    """
-    serializer = dict(CHALLENGE_SERIALIZERS).get(name, None)
-    if serializer is None:
-        raise NotFound
-    return serializer
+def make_underscore(name) -> str:
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()

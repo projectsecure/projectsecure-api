@@ -2,9 +2,13 @@ from django.db import models
 import uuid
 from django.conf import settings
 from challenges.exceptions import NotCompletedError, AlreadyCompletedError
+from polymorphic.models import PolymorphicModel
 
 
-class Challenge(models.Model):
+class Challenge(PolymorphicModel):
+    class Meta:
+        unique_together = ['user', 'polymorphic_ctype']
+
     NOT_STARTED = "NOT_STARTED"
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
@@ -17,24 +21,20 @@ class Challenge(models.Model):
         (ERROR, 'Error'),
     )
 
-    class Meta:
-        abstract = True
-
     class ChallengeMeta:
         title = None
         description = None
         steps = []
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default=NOT_STARTED)
     message = models.CharField(max_length=140, blank=True, null=False)
 
-    def get_registered_steps_handlers(self):
+    def get_registered_steps_handler(self, step_name):
         """
         Gets all methods that are registered through the register_step_handler decorator.
         """
-        registered_step_handlers = {}
         for methodname in dir(self):
             # Ignore all errors
             try:
@@ -44,15 +44,16 @@ class Challenge(models.Model):
 
             registered = getattr(attr, 'registered', False)
 
-            if registered:
-                registered_step_handlers[methodname] = attr
+            if registered and methodname == step_name:
+                return attr
 
-        return registered_step_handlers
+        return None
 
     def on_input(self, step_name, request):
-        step_func = self.get_registered_steps_handlers()[step_name]
-        step_func(request)
-        self.save()
+        step_func = self.get_registered_steps_handler(step_name)
+        if step_func is not None:
+            step_func(request)
+            self.save()
 
     def mark_as_completed(self, raise_exception=False):
         """

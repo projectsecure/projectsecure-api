@@ -6,14 +6,16 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
 from challenges.exceptions import AlreadyStartedError
-from challenges.helpers import get_challenge, get_challenge_serializer
+from challenges.helpers import get_challenge
+from challenges.serializers import ChallengeSerializer
+from challenges.helpers import make_underscore
 
 
 class ChallengeDetailView(APIView):
     def get(self, request, challenge_name):
         challenge_type = get_challenge(challenge_name)
         challenge = get_object_or_404(challenge_type, user=request.user)
-        serializer = get_challenge_serializer(challenge_name)(instance=challenge)
+        serializer = ChallengeSerializer(instance=challenge)
         return Response(serializer.data)
 
 
@@ -21,8 +23,8 @@ class ChallengeStepUpdateView(APIView):
     def put(self, request, challenge_name, step_name):
         challenge_type = get_challenge(challenge_name)
         challenge = get_object_or_404(challenge_type, user=request.user)
-        data = challenge.on_input(step_name, request) or {}
-        return Response(data)
+        challenge.on_input(step_name, request)
+        return Response({})
 
 
 class ChallengeStartView(APIView):
@@ -36,17 +38,24 @@ class ChallengeStartView(APIView):
         except IntegrityError:
             raise AlreadyStartedError
 
-        serializer = get_challenge_serializer(challenge_name)(instance=challenge)
+        serializer = ChallengeSerializer(instance=challenge)
         return Response(serializer.data)
 
 
 class ChallengesListView(APIView):
-    permission_classes = (AllowAny,)
-
-    def get(self, _):
-        data = [{'slug': challenge[0], 'title': challenge[1].ChallengeMeta.title,
-                 'description': challenge[1].ChallengeMeta.description} for challenge in CHALLENGES]
-        return Response(data)
+    def get(self, request):
+        # Fetch all challenges that the user has in the db
+        challenges_with_status = Challenge.objects.filter(user=request.user).all()
+        # Get all possible challenges
+        all_challenge_map = {k: v() for k, v in dict(CHALLENGES).items()}
+        # Replace challenges where the user has a status, O(n) vs O(n^2) when using list for both
+        for challenge in challenges_with_status:
+            challenge_name = make_underscore(challenge)
+            all_challenge_map[challenge_name] = challenge
+        # Put that back into a list for serializer
+        challenges = all_challenge_map.values()
+        serializer = ChallengeSerializer(instance=challenges, many=True)
+        return Response(serializer.data)
 
 
 class ChallengeCompleteView(APIView):
