@@ -14,6 +14,3 @@ urlpatterns = [
     url(r'api/', include('challenges.urls')),
     url(r'api/', include('feedback.urls')),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

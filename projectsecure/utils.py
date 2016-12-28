@@ -7,8 +7,8 @@ from rest_framework.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_E
 def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
-    if response.data.get('detail', None) is not None:
-        response.data['error'] = response.data.pop('detail', None)
+    #if response.data.get('detail', None) is not None:
+     #   response.data['error'] = response.data.pop('detail', None)
 
     return response
 

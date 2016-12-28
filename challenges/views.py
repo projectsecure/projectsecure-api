@@ -8,6 +8,8 @@ from django.db import IntegrityError
 from challenges.exceptions import AlreadyStartedError
 from challenges.helpers import get_challenge
 from challenges.serializers import ChallengeSerializer
+from challenges.renderers import PNGRenderer
+from django.conf import settings
 
 
 class ChallengeDetailView(APIView):
@@ -71,3 +73,21 @@ class ChallengeCompleteView(APIView):
         challenge.mark_as_completed(raise_exception=True)
         challenge.save()
         return Response({})
+
+
+class BadgesListView(APIView):
+    def get(self, _):
+        pass
+
+
+class ChallengeBadgeView(APIView):
+    renderer_classes = (PNGRenderer, )
+    permission_classes = (AllowAny, )
+
+    def get(self, _, challenge_name):
+        challenge_type = get_challenge(challenge_name)
+        image_path = '{0}/challenges/{1}/static/img/badge_{1}.png'.format(settings.BASE_DIR,
+                                                                          challenge_type)
+        image = open(image_path, 'rb')
+        return Response(data=image)
+
