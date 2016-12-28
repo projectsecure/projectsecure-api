@@ -10,7 +10,7 @@ JWT_SECRET_KEY = os.environ['JWT_SECRET_KEY']
 DEBUG = os.environ['DEBUG'] == 'TRUE'
 
 ALLOWED_HOSTS = [
-    '*'
+    os.environ['HOST']
 ]
 
 
@@ -116,6 +116,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
