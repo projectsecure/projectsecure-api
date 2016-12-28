@@ -8,6 +8,7 @@ from challenges.models import ButtonStep, InputStep
 from challenges.registry import CHALLENGES
 from challenges.tests.helpers import convenience_complete, get_challenge_factory
 from challenges.serializers import ChallengeSerializer
+from challenges.tests.factories import ChallengeFactory
 
 
 class TestChallengeDetailView(APITestCase):
@@ -47,20 +48,34 @@ class TestChallengeDetailView(APITestCase):
 
 class TestChallengesListView(APITestCase):
     def test_retrieve_all_challenges(self):
-        user = UserFactory()
+        # Create a fake challenge
+        user_challenge = ChallengeFactory(status=Challenge.COMPLETED)
 
-        self.client.force_authenticate(user=user)
+        self.client.force_authenticate(user=user_challenge.user)
         response = self.client.get(reverse('challenge-list'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {})
+
+        challenges = [challenge() for challenge in dict(CHALLENGES).values()] + [user_challenge]
+        serializer = ChallengeSerializer(instance=challenges, many=True)
+        self.assertEqual(response.json(), serializer.data)
+        self.assertEqual({Challenge.NOT_STARTED, Challenge.COMPLETED},
+                         set([challenge['status'] for challenge in response.json()]),
+                         msg='All challenges should not be started '
+                             'except for one that was lazily created.')
 
     def test_retrieve_all_challenges_not_authorized(self):
         response = self.client.get(reverse('challenge-list'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(),
-                         {'error': 'Authentication credentials were not provided.'})
+
+        # Make sure that all challenges are not started
+        challenges = [challenge() for challenge in dict(CHALLENGES).values()]
+        serializer = ChallengeSerializer(instance=challenges, many=True)
+        self.assertEqual(response.json(), serializer.data)
+        self.assertEqual({Challenge.NOT_STARTED},
+                         set([challenge['status'] for challenge in response.json()]),
+                         msg='All challenges should not be started.')
 
 
 class TestChallengeStepUpdateView(APITestCase):
