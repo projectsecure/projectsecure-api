@@ -1,7 +1,6 @@
 import factory
-from django.contrib.auth.models import User
 from faker import Factory as FakeFactory
-
+from django.conf import settings
 fake = FakeFactory.create()
 
 DEFAULT_PASSWORD = 'a_password'
@@ -9,11 +8,10 @@ DEFAULT_PASSWORD = 'a_password'
 
 class UserFactory(factory.DjangoModelFactory):
     class Meta:
-        model = User
+        model = settings.AUTH_USER_MODEL
 
     username = factory.Sequence(lambda n: 'username_{0}'.format(n))
-    first_name = fake.name().split()[0]
-    last_name = fake.name().split()[1]
+    color = fake.hex_color()
     email = fake.email()
     is_staff = False
     is_active = True

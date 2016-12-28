@@ -23,9 +23,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
     'rest_framework',
     'django_extensions',
     'challenges',
+    'feedback',
+    'polymorphic',
 ]
 
 MIDDLEWARE = [
@@ -121,11 +124,12 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-    ),
-    'EXCEPTION_HANDLER': 'projectsecure.utils.custom_exception_handler',
+    )
 }
 
 JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
     'JWT_SECRET_KEY': JWT_SECRET_KEY,
 }
+
+AUTH_USER_MODEL = 'users.User'

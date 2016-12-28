@@ -1,7 +1,7 @@
 from rest_framework.test import APITestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from .factories import UserFactory, DEFAULT_PASSWORD
+from users.tests.factories import UserFactory, DEFAULT_PASSWORD
 import datetime
 
 
@@ -23,22 +23,21 @@ class TestUserViewSet(APITestCase):
         response = self.client.get(reverse('user-me'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'username': user.username, 'last_name': user.last_name,
-                                           'first_name': user.first_name, 'email': user.email})
+        self.assertEqual(response.json(), {'username': user.username,
+                                           'color': user.color, 'email': user.email})
 
     def test_me_unauthenticated(self):
         response = self.client.get(reverse('user-me'))
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(response.json(), {'error': 'Authentication credentials were not provided.'})
+        self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
 
     def test_register_user_with_valid_data(self):
         data = {
             'username': 'anewuser',
             'password': '1randompassword',
             'email': 'anewuser@test.de',
-            'first_name': 'A New',
-            'last_name': 'User'
+            'color': '#ffffff'
         }
         response = self.client.post(reverse('user-register'), data=data)
 
@@ -52,8 +51,7 @@ class TestUserViewSet(APITestCase):
             'username': user.username,
             'password': '1randompassword',
             'email': user.email,
-            'first_name': user.first_name,
-            'last_name': user.last_name
+            'color': user.color,
         }
         response = self.client.post(reverse('user-register'), data=data)
 
@@ -66,7 +64,8 @@ class TestUserViewSet(APITestCase):
         response = self.client.post(reverse('user-register'), data=data)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(response.json(), {'password': ['This field is required.'],
+        self.assertEqual(response.json(), {'color': ['This field is required.'],
+                                           'password': ['This field is required.'],
                                            'username': ['This field is required.']})
 
 
@@ -94,7 +93,7 @@ class TestAuthRefreshJWTView(APITestCase):
         token = create_token(user)
         data = {'token': token}
         response = self.client.post(reverse('auth-jwt-refresh'), data=data)
-        print(response.json())
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.json().get('token') is not None)
 

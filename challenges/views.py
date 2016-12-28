@@ -1,60 +1,31 @@
-from challenges.serializers import CHALLENGE_SERIALIZERS
 from rest_framework.permissions import AllowAny
-from challenges.models import CHALLENGES
+from challenges.registry import CHALLENGES
 from rest_framework.response import Response
 from challenges.models import Challenge
 from rest_framework.views import APIView
-from rest_framework.exceptions import NotFound
 from django.shortcuts import get_object_or_404
 from django.db import IntegrityError
-from rest_framework.status import HTTP_409_CONFLICT
-
-
-def get_challenge(name) -> 'Challenge':
-    challenge = dict(CHALLENGES).get(name, None)
-    if challenge is None:
-        raise NotFound
-    return challenge
-
-
-def get_challenge_serializer(name):
-    """
-    Returns a serialzer object based on a challenge name.
-
-    Raises: NotFound - Error if challenge name was not found
-
-    Returns: ChallengeSerializer - A specialized serializer for a challenge
-    """
-    serializer = dict(CHALLENGE_SERIALIZERS).get(name, None)
-    if serializer is None:
-        raise NotFound
-    return serializer
+from challenges.exceptions import AlreadyStartedError
+from challenges.helpers import get_challenge
+from challenges.serializers import ChallengeSerializer
+from challenges.renderers import PNGRenderer
+from django.conf import settings
 
 
 class ChallengeDetailView(APIView):
     def get(self, request, challenge_name):
         challenge_type = get_challenge(challenge_name)
         challenge = get_object_or_404(challenge_type, user=request.user)
-        serializer = get_challenge_serializer(challenge_name)(instance=challenge)
+        serializer = ChallengeSerializer(instance=challenge)
         return Response(serializer.data)
-
-
-class ChallengeStepsView(APIView):
-    permission_classes = (AllowAny,)
-
-    def get(self, _, challenge_name):
-        steps = get_challenge(challenge_name).ChallengeMeta.steps
-        data = [{'name': step[0], 'type': type(step[1]).__name__, 'options': step[1].to_json()} for
-                step in steps]
-        return Response(data)
 
 
 class ChallengeStepUpdateView(APIView):
     def put(self, request, challenge_name, step_name):
         challenge_type = get_challenge(challenge_name)
         challenge = get_object_or_404(challenge_type, user=request.user)
-        data = challenge.on_input(step_name, request) or {}
-        return Response(data)
+        challenge.on_input(step_name, request)
+        return Response({})
 
 
 class ChallengeStartView(APIView):
@@ -66,16 +37,52 @@ class ChallengeStartView(APIView):
         try:
             challenge.save()
         except IntegrityError:
-            return Response({'error': 'Challenge was already started.'}, status=HTTP_409_CONFLICT)
+            raise AlreadyStartedError
 
-        serializer = get_challenge_serializer(challenge_name)(instance=challenge)
+        serializer = ChallengeSerializer(instance=challenge)
         return Response(serializer.data)
 
 
 class ChallengesListView(APIView):
     permission_classes = (AllowAny,)
 
-    def get(self, _):
-        data = [{'slug': challenge[0], 'title': challenge[1].ChallengeMeta.title,
-                 'description': challenge[1].ChallengeMeta.description} for challenge in CHALLENGES]
-        return Response(data)
+    def get(self, request):
+        # Get all possible challenges
+        all_challenge_map = {k: v() for k, v in dict(CHALLENGES).items()}
+
+        if request.user.is_authenticated():
+            # Fetch all challenges that the user has in the db
+            challenges_with_status = Challenge.objects.filter(user=request.user).all()
+
+            # Replace challenges where the user has a status
+            # O(n) vs O(n^2) when using list for both
+            for challenge in challenges_with_status:
+                challenge_name = challenge.underscore_type_name()
+                all_challenge_map[challenge_name] = challenge
+
+        # Put that back into a list for serializer
+        challenges = all_challenge_map.values()
+        serializer = ChallengeSerializer(instance=challenges, many=True)
+        return Response(serializer.data)
+
+
+class ChallengeCompleteView(APIView):
+    def post(self, request, challenge_name):
+        challenge_type = get_challenge(challenge_name)
+        challenge = get_object_or_404(challenge_type, user=request.user)
+        challenge.mark_as_completed(raise_exception=True)
+        challenge.save()
+        return Response({})
+
+
+class ChallengeBadgeView(APIView):
+    renderer_classes = (PNGRenderer, )
+    permission_classes = (AllowAny, )
+
+    def get(self, _, challenge_name):
+        challenge_type = get_challenge(challenge_name)
+        image_path = '{0}/challenges/{1}/static/img/badge_{1}.png'.format(settings.BASE_DIR,
+                                                                          challenge_name)
+        image = open(image_path, 'rb')
+        return Response(data=image)
+
