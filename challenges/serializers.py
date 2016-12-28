@@ -1,10 +1,16 @@
-from rest_framework import serializers
-from challenges.models import TorChallenge, IdentityLeakCheckerChallenge, IDENTITY_LEAK_CECKER_CHALLENGE, TOR_CHALLENGE
+from challenges.models import Challenge
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 
-class ChallengeSerializerMixin:
+class ChallengeSerializer(ModelSerializer):
+    title = SerializerMethodField()
+    description = SerializerMethodField()
+    steps = SerializerMethodField()
+    slug = SerializerMethodField()
+
     class Meta:
-        fields = ('title', 'description', 'status', 'message')
+        model = Challenge
+        fields = ('title', 'description', 'status', 'message', 'steps', 'slug')
 
     def get_title(self, obj):
         return obj.ChallengeMeta.title
@@ -12,27 +18,12 @@ class ChallengeSerializerMixin:
     def get_description(self, obj):
         return obj.ChallengeMeta.description
 
+    def get_steps(self, obj):
+        return [{'name': step[0],
+                 'type': type(step[1]).__name__,
+                 'status': obj.status_for_step(step[0]),
+                 'options': step[1].to_json()} for step in
+                obj.ChallengeMeta.steps]
 
-class TorChallengeSerializer(serializers.HyperlinkedModelSerializer, ChallengeSerializerMixin):
-    title = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
-
-    class Meta:
-        model = TorChallenge
-        fields = ChallengeSerializerMixin.Meta.fields
-
-
-class IdentityLeakCheckerChallengeSerializer(serializers.HyperlinkedModelSerializer,
-                                             ChallengeSerializerMixin):
-    title = serializers.SerializerMethodField()
-    description = serializers.SerializerMethodField()
-
-    class Meta:
-        model = IdentityLeakCheckerChallenge
-        fields = ChallengeSerializerMixin.Meta.fields
-
-
-CHALLENGE_SERIALIZERS = (
-    (IDENTITY_LEAK_CECKER_CHALLENGE, IdentityLeakCheckerChallengeSerializer),
-    (TOR_CHALLENGE, TorChallengeSerializer)
-)
+    def get_slug(self, obj):
+        return obj.underscore_type_name()

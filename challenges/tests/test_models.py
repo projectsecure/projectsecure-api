@@ -1,9 +1,8 @@
 from django.test import TestCase
-from challenges.models import CHALLENGES, ButtonStep, Step, TextStep, InputStep, Challenge
-from challenges.tests.factories import IdentityLeakCheckerChallengeFactory, TorChallengeFactory, \
-    get_challenge_factory
-from unittest.mock import patch, Mock, PropertyMock
+from challenges.registry import CHALLENGES
+from challenges.models import ButtonStep, Step, TextStep, InputStep, Challenge
 from challenges.tests.helpers import convenience_complete
+from challenges.tests.helpers import get_challenge_factory
 
 
 class TestChallenge(TestCase):
@@ -38,38 +37,12 @@ class TestChallenge(TestCase):
             self.assertTrue(challenge.mark_as_completed())
             self.assertTrue(challenge.status == Challenge.COMPLETED)
 
-            
-class TestIdentityLeakCheckerChallenge(TestCase):
-    def test_check_email(self):
-        email = 'test@example.com'
-        challenge = IdentityLeakCheckerChallengeFactory()
-        url = 'https://sec.hpi.uni-potsdam.de/leak-checker/search'
-
-        request_mock = Mock()
-        request_mock.data.get.return_value = email
-
-        with patch('requests.post') as patched_post:
-            type(patched_post.return_value).ok = PropertyMock(return_value=True)
-
-            challenge.check_email(request_mock)
-            patched_post.assert_called_once_with(url, data={'email': email})
-
-
-class TestTorChallenge(TestCase):
-    def test_check_tor_connection(self):
-        challenge = TorChallengeFactory()
-        mocked_ip = '192.168.178.22'
-        url = 'https://check.torproject.org/exit-addresses'
-
-        request_mock = Mock()
-        request_mock.META.get.return_value = mocked_ip
-
-        with patch('requests.get') as patched_get:
-            type(patched_get.return_value).text = PropertyMock(return_value=mocked_ip)
-
-            challenge.check_tor_connection(request_mock)
-            request_mock.META.get.assert_called_once_with('REMOTE_ADDR')
-            patched_get.assert_called_once_with(url)
+    def test_slug_equals_lowercase_class_name(self):
+        for challenge_type in list(CHALLENGES):
+            underscore_class_name = challenge_type[1]().underscore_type_name()
+            print(underscore_class_name)
+            print(challenge_type)
+            self.assertEqual(challenge_type[0], underscore_class_name)
 
 
 class TestStep(TestCase):

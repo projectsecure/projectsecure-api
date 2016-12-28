@@ -1,4 +1,6 @@
 from challenges.models import Challenge
+from challenges.tests.factories import ChallengeFactory
+from challenges.registry import CHALLENGE_FACTORIES
 
 
 def convenience_complete(challenge):
@@ -9,3 +11,7 @@ def convenience_complete(challenge):
     for completion_field in completion_fields:
         setattr(challenge, completion_field.name, Challenge.COMPLETED)
     challenge.save()
+
+
+def get_challenge_factory(name) -> ChallengeFactory:
+    return dict(CHALLENGE_FACTORIES)[name]()

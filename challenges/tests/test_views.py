@@ -1,12 +1,14 @@
 from rest_framework.test import APITestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
-from challenges.tests.factories import get_challenge_factory
 from users.tests.factories import UserFactory
-from challenges.models import CHALLENGES, Challenge
+from challenges.models import Challenge
 from django.db import transaction
 from challenges.models import ButtonStep, InputStep
-from challenges.tests.helpers import convenience_complete
+from challenges.registry import CHALLENGES
+from challenges.tests.helpers import convenience_complete, get_challenge_factory
+from challenges.serializers import ChallengeSerializer
+from challenges.tests.factories import ChallengeFactory
 
 
 class TestChallengeDetailView(APITestCase):
@@ -19,11 +21,10 @@ class TestChallengeDetailView(APITestCase):
             response = self.client.get(
                 reverse('challenge-detail', kwargs={'challenge_name': challenge_type[0]}))
 
+            serializer = ChallengeSerializer(instance=challenge)
+
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(response.json(),
-                             {'description': challenge.ChallengeMeta.description,
-                              'title': challenge.ChallengeMeta.title, 'status': challenge.status,
-                              'message': challenge.message})
+            self.assertEqual(response.json(), serializer.data)
 
     def test_retrieve_challenge_not_found(self):
         user = UserFactory()
@@ -47,35 +48,34 @@ class TestChallengeDetailView(APITestCase):
 
 class TestChallengesListView(APITestCase):
     def test_retrieve_all_challenges(self):
+        # Create a fake challenge
+        user_challenge = ChallengeFactory(status=Challenge.COMPLETED)
+
+        self.client.force_authenticate(user=user_challenge.user)
         response = self.client.get(reverse('challenge-list'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(),
-                         [{'title': challenge[1].ChallengeMeta.title,
-                           'description': challenge[1].ChallengeMeta.description,
-                           'slug': challenge[0]} for challenge in CHALLENGES])
 
+        challenges = [challenge() for challenge in dict(CHALLENGES).values()] + [user_challenge]
+        serializer = ChallengeSerializer(instance=challenges, many=True)
+        self.assertEqual(response.json(), serializer.data)
+        self.assertEqual({Challenge.NOT_STARTED, Challenge.COMPLETED},
+                         set([challenge['status'] for challenge in response.json()]),
+                         msg='All challenges should not be started '
+                             'except for one that was lazily created.')
 
-class TestChallengeStepsView(APITestCase):
-    def test_retrieve_all_steps(self):
-        for challenge_type in CHALLENGES:
-            response = self.client.get(reverse('challenges-step-list', kwargs={
-                'challenge_name': challenge_type[0]}))
+    def test_retrieve_all_challenges_not_authorized(self):
+        response = self.client.get(reverse('challenge-list'))
 
-            self.assertEqual(response.status_code, status.HTTP_200_OK)
-            expected_response = [{'name': step[0], 'type': type(step[1]).__name__,
-                                  'options': step[1].to_json()} for step in
-                                 challenge_type[1].ChallengeMeta.steps]
-            self.assertEqual(response.json(), expected_response)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_challenge_not_found(self):
-        for challenge_type in CHALLENGES:
-            response = self.client.get(reverse('challenges-step-list', kwargs={
-                'challenge_name': 'something'}))
-
-            self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
-                         msg='Challenge should not be found for {0} type'.format(challenge_type[0]))
-            self.assertEqual(response.json(), {'error': 'Not found.'})
+        # Make sure that all challenges are not started
+        challenges = [challenge() for challenge in dict(CHALLENGES).values()]
+        serializer = ChallengeSerializer(instance=challenges, many=True)
+        self.assertEqual(response.json(), serializer.data)
+        self.assertEqual({Challenge.NOT_STARTED},
+                         set([challenge['status'] for challenge in response.json()]),
+                         msg='All challenges should not be started.')
 
 
 class TestChallengeStepUpdateView(APITestCase):
@@ -124,19 +124,17 @@ class TestChallengeStartView(APITestCase):
     def test_start_challenge(self):
         user = UserFactory()
         for challenge_type in CHALLENGES:
-            challenge = challenge_type[1]
-
             self.client.force_authenticate(user=user)
 
-            response = self.client.post(
-                reverse('challenge-start', kwargs={'challenge_name': challenge_type[0]}))
+            with transaction.atomic():
+                response = self.client.post(
+                    reverse('challenge-start', kwargs={'challenge_name': challenge_type[0]}))
+            challenge = challenge_type[1].objects.first()
+            serializer = ChallengeSerializer(instance=challenge)
 
             self.assertEqual(response.status_code, status.HTTP_200_OK)
-            self.assertEqual(response.json(), {'title': challenge.ChallengeMeta.title,
-                                               'description': challenge.ChallengeMeta.description,
-                                               'message': '',
-                                               'status': Challenge.IN_PROGRESS})
-            self.assertEqual(challenge.objects.first().user, user)
+            self.assertEqual(response.json(), serializer.data)
+            self.assertEqual(challenge.user, user)
 
     def test_start_challenge_already_started(self):
         for challenge_type in CHALLENGES:

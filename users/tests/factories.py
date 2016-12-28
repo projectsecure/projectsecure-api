@@ -11,7 +11,6 @@ class UserFactory(factory.DjangoModelFactory):
         model = settings.AUTH_USER_MODEL
 
     username = factory.Sequence(lambda n: 'username_{0}'.format(n))
-    full_name = fake.name()
     color = fake.hex_color()
     email = fake.email()
     is_staff = False
