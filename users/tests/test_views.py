@@ -23,7 +23,7 @@ class TestUserViewSet(APITestCase):
         response = self.client.get(reverse('user-me'))
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.json(), {'username': user.username, 'full_name': user.full_name,
+        self.assertEqual(response.json(), {'username': user.username,
                                            'color': user.color, 'email': user.email})
 
     def test_me_unauthenticated(self):
@@ -37,7 +37,6 @@ class TestUserViewSet(APITestCase):
             'username': 'anewuser',
             'password': '1randompassword',
             'email': 'anewuser@test.de',
-            'full_name': 'Peter Parker',
             'color': '#ffffff'
         }
         response = self.client.post(reverse('user-register'), data=data)
@@ -53,7 +52,6 @@ class TestUserViewSet(APITestCase):
             'password': '1randompassword',
             'email': user.email,
             'color': user.color,
-            'full_name': user.full_name
         }
         response = self.client.post(reverse('user-register'), data=data)
 
@@ -67,7 +65,6 @@ class TestUserViewSet(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), {'color': ['This field is required.'],
-                                           'full_name': ['This field is required.'],
                                            'password': ['This field is required.'],
                                            'username': ['This field is required.']})
 

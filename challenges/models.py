@@ -1,11 +1,20 @@
 from django.db import models
 import uuid
 from django.conf import settings
-import requests
 from challenges.exceptions import NotCompletedError, AlreadyCompletedError
+from polymorphic.models import PolymorphicModel
+import re
 
 
-class Challenge(models.Model):
+def make_underscore(name) -> str:
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
+class Challenge(PolymorphicModel):
+    class Meta:
+        unique_together = ['user', 'polymorphic_ctype']
+
     NOT_STARTED = "NOT_STARTED"
     IN_PROGRESS = "IN_PROGRESS"
     COMPLETED = "COMPLETED"
@@ -18,24 +27,20 @@ class Challenge(models.Model):
         (ERROR, 'Error'),
     )
 
-    class Meta:
-        abstract = True
-
     class ChallengeMeta:
         title = None
         description = None
         steps = []
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, unique=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     status = models.CharField(max_length=11, choices=STATUS_CHOICES, default=NOT_STARTED)
     message = models.CharField(max_length=140, blank=True, null=False)
 
-    def get_registered_steps_handlers(self):
+    def get_registered_steps_handler(self, step_name):
         """
         Gets all methods that are registered through the register_step_handler decorator.
         """
-        registered_step_handlers = {}
         for methodname in dir(self):
             # Ignore all errors
             try:
@@ -45,14 +50,16 @@ class Challenge(models.Model):
 
             registered = getattr(attr, 'registered', False)
 
-            if registered:
-                registered_step_handlers[methodname] = attr
+            if registered and methodname == step_name:
+                return attr
 
-        return registered_step_handlers
+        return None
 
     def on_input(self, step_name, request):
-        step_func = self.get_registered_steps_handlers()[step_name]
-        step_func(request)
+        step_func = self.get_registered_steps_handler(step_name)
+        if step_func is not None:
+            step_func(request)
+            self.save()
 
     def mark_as_completed(self, raise_exception=False):
         """
@@ -81,6 +88,16 @@ class Challenge(models.Model):
         # Actually mark the challenge itself as completed
         self.status = Challenge.COMPLETED
         return True
+
+    def status_for_step(self, step_name):
+        # TODO: Test this thing here
+        for field in self._meta.get_fields():
+            if field.name == '{0}_status'.format(step_name):
+                return getattr(self, field.name)
+        return None
+
+    def underscore_type_name(self):
+        return make_underscore(type(self).__name__)
 
 
 def register_step_handler():
@@ -125,85 +142,3 @@ class InputStep(Step):
         json.update({'input_title': self.input_title, 'button_title': self.button_title})
         return json
 
-
-class IdentityLeakCheckerChallenge(Challenge):
-    class ChallengeMeta:
-        title = 'HPI Identity Leak Checker'
-        description = """Mit dem HPI Identity Leak Checker können Sie mithilfe Ihrer E-Mailadresse
-        prüfen, ob Ihre persönlichen Identitätsdaten bereits im Internet veröffentlicht wurden.
-        Per Datenabgleich wird kontrolliert, ob Ihre E-Mailadresse in Verbindung mit anderen
-        persönlichen Daten (z.B. Telefonnummer, Geburtsdatum oder Adresse) im Internet offengelegt
-        wurde und missbraucht werden könnte."""
-        steps = [
-            ('introduction',
-             TextStep(title='sdf', text='Starte die Challenge mit einem Klick auf den Button')),
-            ('check_email', InputStep(input_title='Enter email', button_title='Check', title=''))
-        ]
-
-    check_email_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
-                                          default=Challenge.NOT_STARTED)
-
-    @register_step_handler()
-    def check_email(self, request, *args, **kwargs):
-        """
-        Send the user's email to the HPI Identity Leak Checker
-
-        Returns True if web request was successful
-        """
-        if self.check_email_status == Challenge.COMPLETED:
-            return
-
-        email = request.data.get('input')
-        url = 'https://sec.hpi.uni-potsdam.de/leak-checker/search'
-        response = requests.post(url, data={'email': email})
-
-        if response.ok:
-            self.check_email_status = Challenge.COMPLETED
-        else:
-            self.check_email_status = Challenge.ERROR
-
-
-class TorChallenge(Challenge):
-    class ChallengeMeta:
-        title = 'Anonym mit Tor surfen'
-        description = """Mit dem HPI Identity Leak Checker können Sie mithilfe Ihrer E-Mailadresse
-        prüfen, ob Ihre persönlichen Identitätsdaten bereits im Internet veröffentlicht wurden.
-        Per Datenabgleich wird kontrolliert, ob Ihre E-Mailadresse in Verbindung mit anderen
-        persönlichen Daten (z.B. Telefonnummer, Geburtsdatum oder Adresse) im Internet offengelegt
-        wurde und missbraucht werden könnte."""
-        steps = [
-            ('introduction',
-             TextStep(title='', text='Starte die Challenge mit einem Klick auf den Button')),
-            ('check_tor_connection', ButtonStep(button_title='Check tor connection', title=''))
-        ]
-
-    check_tor_connection_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
-                                                   default=Challenge.NOT_STARTED)
-
-    @register_step_handler()
-    def check_tor_connection(self, request):
-        """
-        Checks if the given IP is a Tor exit node
-
-        Returns True if given IP is Tor exit node
-        """
-        if self.check_tor_connection_status == Challenge.COMPLETED:
-            return
-
-        ip = request.META.get('REMOTE_ADDR')
-        url = 'https://check.torproject.org/exit-addresses'
-        response = requests.get(url)
-
-        if ip in (response.text or ''):
-            self.check_tor_connection_status = Challenge.COMPLETED
-        else:
-            self.check_tor_connection_status = Challenge.ERROR
-
-
-IDENTITY_LEAK_CECKER_CHALLENGE = 'identity_leak_checker'
-TOR_CHALLENGE = 'tor'
-
-CHALLENGES = (
-    (IDENTITY_LEAK_CECKER_CHALLENGE, IdentityLeakCheckerChallenge),
-    (TOR_CHALLENGE, TorChallenge)
-)

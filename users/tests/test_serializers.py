@@ -11,12 +11,11 @@ class TestUserSerializer(TestCase):
         """
         user = UserFactory()
         data = UserSerializer(user).data
-        keys = {'username', 'color', 'full_name', 'email'}
+        keys = {'username', 'color', 'email'}
 
         self.assertEqual(data.keys(), keys)
         self.assertEqual(data.pop('username'), user.username)
         self.assertEqual(data.pop('color'), user.color)
-        self.assertEqual(data.pop('full_name'), user.full_name)
         self.assertEqual(data.pop('email'), user.email)
 
         self.assertEqual(len(data), 0)
@@ -25,8 +24,7 @@ class TestUserSerializer(TestCase):
         """
         Tests that a user gets created when the serializer is initialized with valid data
         """
-        data = {'username': 'ausername2348353', 'password': 'fsfsanbshfbsjkf', 'color': '#ffffff',
-                'full_name': 'a_name'}
+        data = {'username': 'ausername2348353', 'password': 'fsfsanbshfbsjkf', 'color': '#ffffff'}
         serializer = UserSerializer(data=data)
         self.assertTrue(serializer.is_valid())
         serializer.save()
