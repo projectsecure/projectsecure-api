@@ -1,6 +1,5 @@
 from challenges.views import ChallengesListView, ChallengeDetailView, \
-    ChallengeStepUpdateView, ChallengeStartView, ChallengeCompleteView, BadgesListView, \
-    ChallengeBadgeView
+    ChallengeStepUpdateView, ChallengeStartView, ChallengeCompleteView, ChallengeBadgeView
 from django.conf.urls import url
 
 urlpatterns = [
