@@ -9,7 +9,9 @@ JWT_SECRET_KEY = os.environ['JWT_SECRET_KEY']
 
 DEBUG = os.environ['DEBUG'] == 'TRUE'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '*'
+]
 
 
 # Application definition
@@ -119,8 +121,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-    ),
-    'EXCEPTION_HANDLER': 'projectsecure.utils.custom_exception_handler',
+    )
 }
 
 JWT_AUTH = {

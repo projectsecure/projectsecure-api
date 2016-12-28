@@ -1,5 +1,7 @@
 from django.conf.urls import url, include
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
 
 handler400 = 'projectsecure.utils.bad_request'
 handler403 = 'projectsecure.utils.permission_denied'

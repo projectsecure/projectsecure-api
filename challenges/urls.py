@@ -1,6 +1,5 @@
 from challenges.views import ChallengesListView, ChallengeDetailView, \
-    ChallengeStepUpdateView, ChallengeStartView, ChallengeCompleteView
-
+    ChallengeStepUpdateView, ChallengeStartView, ChallengeCompleteView, ChallengeBadgeView
 from django.conf.urls import url
 
 urlpatterns = [
@@ -12,5 +11,7 @@ urlpatterns = [
         name='challenge-complete'),
     url(r'^challenges/(?P<challenge_name>[a-z_]+)$', ChallengeDetailView.as_view(),
         name='challenge-detail'),
+    url(r'^challenges/(?P<challenge_name>[a-z_]+)/badge$', ChallengeBadgeView.as_view(),
+        name='challenge-badge'),
     url(r'^challenges$', ChallengesListView.as_view(), name='challenge-list'),
 ]

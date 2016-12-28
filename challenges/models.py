@@ -141,4 +141,3 @@ class InputStep(Step):
         json = super(InputStep, self).to_json()
         json.update({'input_title': self.input_title, 'button_title': self.button_title})
         return json
-

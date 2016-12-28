@@ -30,3 +30,10 @@ class TestChallengeStepUrls(TestCase):
         url = reverse('challenges-step-update',
                       kwargs={'challenge_name': challenge_name, 'step_name': step_name})
         self.assertEqual(url, '/api/challenges/{0}/steps/{1}'.format(challenge_name, step_name))
+
+
+class TestChallengeBadgeUrls(TestCase):
+    def test_challenge_badge_url(self):
+        challenge_name = 'a_challenge'
+        url = reverse('challenge-badge', kwargs={'challenge_name': challenge_name})
+        self.assertEqual(url, '/api/challenges/{0}/badge'.format(challenge_name))
