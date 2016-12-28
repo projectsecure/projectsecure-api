@@ -9,6 +9,7 @@ from challenges.registry import CHALLENGES
 from challenges.tests.helpers import convenience_complete, get_challenge_factory
 from challenges.serializers import ChallengeSerializer
 from challenges.tests.factories import ChallengeFactory
+from django.conf import settings
 
 
 class TestChallengeDetailView(APITestCase):
@@ -34,7 +35,7 @@ class TestChallengeDetailView(APITestCase):
                 reverse('challenge-detail', kwargs={'challenge_name': challenge_type[0]}))
 
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-            self.assertEqual(response.json(), {'error': 'Not found.'})
+            self.assertEqual(response.json(), {'detail': 'Not found.'})
 
     def test_retrieve_not_authorized(self):
         for challenge_type in CHALLENGES:
@@ -43,7 +44,7 @@ class TestChallengeDetailView(APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(response.json(),
-                         {'error': 'Authentication credentials were not provided.'})
+                         {'detail': 'Authentication credentials were not provided.'})
 
 
 class TestChallengesListView(APITestCase):
@@ -106,7 +107,7 @@ class TestChallengeStepUpdateView(APITestCase):
                 self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
                                  msg='Challenge should not be found for {0} type'.format(
                                      challenge_type[0]))
-                self.assertEqual(response.json(), {'error': 'Not found.'})
+                self.assertEqual(response.json(), {'detail': 'Not found.'})
 
     def test_update_step_not_authorized(self):
         for challenge_type in CHALLENGES:
@@ -117,7 +118,7 @@ class TestChallengeStepUpdateView(APITestCase):
 
                 self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
                 self.assertEqual(response.json(),
-                                 {'error': 'Authentication credentials were not provided.'})
+                                 {'detail': 'Authentication credentials were not provided.'})
 
 
 class TestChallengeStartView(APITestCase):
@@ -148,7 +149,7 @@ class TestChallengeStartView(APITestCase):
                      reverse('challenge-start', kwargs={'challenge_name': challenge_type[0]}))
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(response.json(), {'error': 'Challenge was already started.'})
+            self.assertEqual(response.json(), {'detail': 'Challenge was already started.'})
 
     def test_start_not_authorized(self):
         for challenge_type in CHALLENGES:
@@ -157,7 +158,7 @@ class TestChallengeStartView(APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(response.json(),
-                             {'error': 'Authentication credentials were not provided.'})
+                             {'detail': 'Authentication credentials were not provided.'})
 
     def test_challenge_not_found(self):
         user = UserFactory()
@@ -170,7 +171,7 @@ class TestChallengeStartView(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND,
                          msg='Challenge should not be found for {0} type'.format(challenge_name))
-        self.assertEqual(response.json(), {'error': 'Not found.'})
+        self.assertEqual(response.json(), {'detail': 'Not found.'})
 
 
 class TestChallengeCompleteView(APITestCase):
@@ -192,7 +193,7 @@ class TestChallengeCompleteView(APITestCase):
             response = self.client.post(
                 reverse('challenge-complete', kwargs={'challenge_name': challenge_type[0]}))
             self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
-            self.assertEqual(response.json(), {'error': 'Not found.'})
+            self.assertEqual(response.json(), {'detail': 'Not found.'})
 
     def test_complete_challenge_not_authorized(self):
         for challenge_type in CHALLENGES:
@@ -200,7 +201,7 @@ class TestChallengeCompleteView(APITestCase):
                 reverse('challenge-complete', kwargs={'challenge_name': challenge_type[0]}))
             self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
             self.assertEqual(response.json(),
-                             {'error': 'Authentication credentials were not provided.'})
+                             {'detail': 'Authentication credentials were not provided.'})
 
     def test_complete_challenge_not_all_steps_completed(self):
         for challenge_type in CHALLENGES:
@@ -210,7 +211,7 @@ class TestChallengeCompleteView(APITestCase):
             response = self.client.post(
                 reverse('challenge-complete', kwargs={'challenge_name': challenge_type[0]}))
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(response.json(), {'error': 'Not all steps completed.'})
+            self.assertEqual(response.json(), {'detail': 'Not all steps completed.'})
 
     def test_complete_challenge_already_completed(self):
         for challenge_type in CHALLENGES:
@@ -222,4 +223,18 @@ class TestChallengeCompleteView(APITestCase):
             response = self.client.post(
                 reverse('challenge-complete', kwargs={'challenge_name': challenge_type[0]}))
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-            self.assertEqual(response.json(), {'error': 'Already completed.'})
+            self.assertEqual(response.json(), {'detail': 'Already completed.'})
+
+
+class TestChallengeBadgeView(APITestCase):
+    def test_retrieve_challenge_badge(self):
+        for challenge_type in CHALLENGES:
+            response = self.client.get(reverse('challenge-badge', args=[challenge_type[0]]))
+            image_path = '{0}/challenges/{1}/static/img/badge_{1}.png'.format(settings.BASE_DIR,
+                                                                              challenge_type[0])
+            self.assertEqual(response.status_code, status.HTTP_200_OK)
+            self.assertEqual(response.data.name, open(image_path, 'rb').name)
+
+    def test_retrieve_challenge_badge_not_found(self):
+        response = self.client.get(reverse('challenge-badge', args=['soemthing']))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

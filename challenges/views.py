@@ -87,7 +87,7 @@ class ChallengeBadgeView(APIView):
     def get(self, _, challenge_name):
         challenge_type = get_challenge(challenge_name)
         image_path = '{0}/challenges/{1}/static/img/badge_{1}.png'.format(settings.BASE_DIR,
-                                                                          challenge_type)
+                                                                          challenge_name)
         image = open(image_path, 'rb')
         return Response(data=image)
 

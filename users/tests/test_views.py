@@ -30,7 +30,7 @@ class TestUserViewSet(APITestCase):
         response = self.client.get(reverse('user-me'))
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(response.json(), {'error': 'Authentication credentials were not provided.'})
+        self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
 
     def test_register_user_with_valid_data(self):
         data = {

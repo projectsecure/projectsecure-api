@@ -13,7 +13,7 @@ urlpatterns = [
     url(r'^challenges/(?P<challenge_name>[a-z_]+)$', ChallengeDetailView.as_view(),
         name='challenge-detail'),
     url(r'^challenges/(?P<challenge_name>[a-z_]+)/badge$', ChallengeBadgeView.as_view(),
-        name='challenge-detail'),
+        name='challenge-badge'),
     url(r'^challenges$', ChallengesListView.as_view(), name='challenge-list'),
     url(r'^badges$', BadgesListView.as_view(), name='badge-list'),
 ]
