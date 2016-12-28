@@ -8,7 +8,6 @@ from django.db import IntegrityError
 from challenges.exceptions import AlreadyStartedError
 from challenges.helpers import get_challenge
 from challenges.serializers import ChallengeSerializer
-from challenges.helpers import make_underscore
 
 
 class ChallengeDetailView(APIView):
@@ -43,15 +42,22 @@ class ChallengeStartView(APIView):
 
 
 class ChallengesListView(APIView):
+    permission_classes = (AllowAny,)
+
     def get(self, request):
-        # Fetch all challenges that the user has in the db
-        challenges_with_status = Challenge.objects.filter(user=request.user).all()
         # Get all possible challenges
         all_challenge_map = {k: v() for k, v in dict(CHALLENGES).items()}
-        # Replace challenges where the user has a status, O(n) vs O(n^2) when using list for both
-        for challenge in challenges_with_status:
-            challenge_name = make_underscore(challenge)
-            all_challenge_map[challenge_name] = challenge
+
+        if request.user.is_authenticated():
+            # Fetch all challenges that the user has in the db
+            challenges_with_status = Challenge.objects.filter(user=request.user).all()
+
+            # Replace challenges where the user has a status
+            # O(n) vs O(n^2) when using list for both
+            for challenge in challenges_with_status:
+                challenge_name = challenge.underscore_type_name()
+                all_challenge_map[challenge_name] = challenge
+
         # Put that back into a list for serializer
         challenges = all_challenge_map.values()
         serializer = ChallengeSerializer(instance=challenges, many=True)

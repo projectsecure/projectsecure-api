@@ -1,6 +1,5 @@
 from challenges.models import Challenge
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
-from challenges.helpers import make_underscore
 
 
 class ChallengeSerializer(ModelSerializer):
@@ -27,5 +26,4 @@ class ChallengeSerializer(ModelSerializer):
                 obj.ChallengeMeta.steps]
 
     def get_slug(self, obj):
-        class_name = type(obj).__name__
-        return make_underscore(class_name)
+        return obj.underscore_type_name()

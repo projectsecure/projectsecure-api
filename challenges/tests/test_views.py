@@ -55,10 +55,10 @@ class TestChallengesListView(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(), {})
 
-    def retrieve_all_challenges_not_authorized(self):
+    def test_retrieve_all_challenges_not_authorized(self):
         response = self.client.get(reverse('challenge-list'))
 
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.json(),
                          {'error': 'Authentication credentials were not provided.'})
 

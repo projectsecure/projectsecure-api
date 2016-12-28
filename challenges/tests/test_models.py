@@ -37,6 +37,13 @@ class TestChallenge(TestCase):
             self.assertTrue(challenge.mark_as_completed())
             self.assertTrue(challenge.status == Challenge.COMPLETED)
 
+    def test_slug_equals_lowercase_class_name(self):
+        for challenge_type in list(CHALLENGES):
+            underscore_class_name = challenge_type[1]().underscore_type_name()
+            print(underscore_class_name)
+            print(challenge_type)
+            self.assertEqual(challenge_type[0], underscore_class_name)
+
 
 class TestStep(TestCase):
     def test_to_json(self):

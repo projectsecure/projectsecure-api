@@ -3,6 +3,12 @@ import uuid
 from django.conf import settings
 from challenges.exceptions import NotCompletedError, AlreadyCompletedError
 from polymorphic.models import PolymorphicModel
+import re
+
+
+def make_underscore(name) -> str:
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
 class Challenge(PolymorphicModel):
@@ -89,6 +95,9 @@ class Challenge(PolymorphicModel):
             if field.name == '{0}_status'.format(step_name):
                 return getattr(self, field.name)
         return None
+
+    def underscore_type_name(self):
+        return make_underscore(type(self).__name__)
 
 
 def register_step_handler():
