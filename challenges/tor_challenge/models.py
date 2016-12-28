@@ -16,7 +16,6 @@ class TorChallenge(Challenge):
              TextStep(title='', text='Starte die Challenge mit einem Klick auf den Button')),
             ('check_tor_connection', ButtonStep(button_title='Check tor connection', title=''))
         ]
-        badge_path = ''
 
     check_tor_connection_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
                                                    default=Challenge.NOT_STARTED)
