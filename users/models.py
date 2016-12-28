@@ -8,5 +8,5 @@ class User(AbstractUser):
         RegexValidator(
             regex='^#(?:[0-9a-fA-F]{3}){1,2}$',
             message='Is not a valid color code',
-        ), # TODO: Test Regex
+        )
     ])

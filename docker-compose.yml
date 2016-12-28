@@ -5,8 +5,6 @@ services:
     image: postgres:9.4
     networks:
       - projectsecure
-    ports:
-      - "5432:5432"
 
   web:
     build: ./
