@@ -75,11 +75,6 @@ class ChallengeCompleteView(APIView):
         return Response({})
 
 
-class BadgesListView(APIView):
-    def get(self, _):
-        pass
-
-
 class ChallengeBadgeView(APIView):
     renderer_classes = (PNGRenderer, )
     permission_classes = (AllowAny, )
