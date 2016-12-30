@@ -15,3 +15,11 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         user.set_password(validated_data['password'])
         user.save()
         return user
+
+    def delete(self, user):
+        if user.is_authenticated:
+            user.delete()
+            return True
+        else:
+            return False
+
