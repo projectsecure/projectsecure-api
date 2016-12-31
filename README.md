@@ -26,7 +26,6 @@ Add a new challenge by creating a new package in `challenges` with the the follo
         ├── __init__.py
         ├── factories.py
         └── test_models.py
-
 ```
 
 In `models.py` add the new challenge that inherits from `Challenge`.
