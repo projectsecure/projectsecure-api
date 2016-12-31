@@ -6,6 +6,7 @@ from django.db import models
 class IdentityLeakCheckerChallenge(Challenge):
     class ChallengeMeta:
         title = 'HPI Identity Leak Checker'
+        summary = 'Teste Offenlegungen deiner Identität'
         description = """Mit dem HPI Identity Leak Checker können Sie mithilfe Ihrer E-Mailadresse
         prüfen, ob Ihre persönlichen Identitätsdaten bereits im Internet veröffentlicht wurden.
         Per Datenabgleich wird kontrolliert, ob Ihre E-Mailadresse in Verbindung mit anderen
