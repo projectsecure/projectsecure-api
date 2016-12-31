@@ -60,11 +60,12 @@ a_button_step_message = models.CharField(max_length=200)
 def a_button_step(self, request):
     # Do some calculations or checks
 
-    if error_that_happened is not None:
-        self.a_button_step_status == Challenge.ERROR
-    else:
+    if some_error is None: 
         self.a_button_step_status == Challenge.COMPLETED
-
+        self.a_button_step_message == 'All done. Nice ;)'
+    else:
+        self.a_button_step_status == Challenge.ERROR
+        self.a_button_step_message == 'Something happened. Try again.'        
 ```
 
 If and only if all steps (so, their status fields) are marked as `COMPLETED`, the user can complete a challenge.
