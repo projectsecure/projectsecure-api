@@ -43,8 +43,6 @@ class PassphraseChallenge(Challenge):
         """
         Returns True if pass phrase is longer then min length
         """
-        if self.check_passphrase_status == Challenge.COMPLETED:
-            return
 
         input = request.data.get('input')
 
