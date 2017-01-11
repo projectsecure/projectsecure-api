@@ -11,5 +11,4 @@ urlpatterns = [
     url(r'^auth/login$', obtain_jwt_token, name='auth-jwt-obtain'),
     url(r'^auth/refresh$', refresh_jwt_token, name='auth-jwt-refresh'),
     url(r'^auth/verify$', verify_jwt_token, name='auth-jwt-verify'),
-    url(r'^auth/delete$', delete_jwt_token, name='delete-jwt-verify'),
 ]
