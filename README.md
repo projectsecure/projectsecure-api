@@ -54,12 +54,15 @@ Define a callback for the `a_button_step` step defined in `steps` above using th
 a_button_step_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
                                        default=Challenge.NOT_STARTED)
 a_button_step_message = models.CharField(max_length=200)
-
 ```
 
 ```python
 @register_step_handler()
 def a_button_step(self, request):
+    # Return early if step is already completed
+    if self.a_button_step_status == Challenge.COMPLETED:
+        return
+
     # Do some calculations or checks
 
     if some_error is None: 
