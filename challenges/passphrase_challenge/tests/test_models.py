@@ -3,6 +3,7 @@ from unittest.mock import patch, Mock, PropertyMock
 from challenges.passphrase_challenge.tests.factories import PassphraseChallengeFactory
 from challenges.models import Challenge
 
+
 class TestPassphraseChallenge(TestCase):
     def test_check_passphrase(self):
         def test_cases_for_status(cases, expected_status):
