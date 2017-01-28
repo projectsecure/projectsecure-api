@@ -5,8 +5,9 @@
 
 ## Development
 1. Install Docker and docker-compose
-2. Changes are auto-reflected
 2. Run `$ docker-machine ip default` to get IP of Docker machine
+3. Run `$ docker-compose run web python3 manage.py migrate` to migrate database
+4. Run `$ docker-compose run web python3 manage.py makemigrations` in case of model changes. Code changes get auto reflected due to the mounted volume
 
 ## Tests
 ```
