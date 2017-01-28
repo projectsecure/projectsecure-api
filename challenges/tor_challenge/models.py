@@ -6,6 +6,7 @@ from django.db import models
 class TorChallenge(Challenge):
     class ChallengeMeta:
         title = 'Anonym mit Tor surfen'
+        summary = 'Lerne, wie du sicher und anonym mit dem Tor Browser normal und im "Deep Web" surfen kannst.'
         description = """Mit dem HPI Identity Leak Checker können Sie mithilfe Ihrer E-Mailadresse
         prüfen, ob Ihre persönlichen Identitätsdaten bereits im Internet veröffentlicht wurden.
         Per Datenabgleich wird kontrolliert, ob Ihre E-Mailadresse in Verbindung mit anderen

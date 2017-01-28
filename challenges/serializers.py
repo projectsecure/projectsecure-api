@@ -7,14 +7,18 @@ class ChallengeSerializer(ModelSerializer):
     description = SerializerMethodField()
     steps = SerializerMethodField()
     slug = SerializerMethodField()
+    summary = SerializerMethodField()
 
     class Meta:
         model = Challenge
-        fields = ('title', 'description', 'status', 'message', 'steps', 'slug')
+        fields = ('title', 'summary', 'description', 'status', 'message', 'steps', 'slug')
 
     def get_title(self, obj):
         return obj.ChallengeMeta.title
-
+    
+    def get_summary(self, obj):
+        return obj.ChallengeMeta.summary
+    
     def get_description(self, obj):
         return obj.ChallengeMeta.description
 
