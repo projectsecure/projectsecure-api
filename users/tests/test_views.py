@@ -2,6 +2,7 @@ from rest_framework.test import APITestCase
 from django.core.urlresolvers import reverse
 from rest_framework import status
 from users.tests.factories import UserFactory, DEFAULT_PASSWORD
+from users.models import User
 import datetime
 
 
@@ -17,7 +18,7 @@ def create_token(user_obj, expired=False):
 
 
 class TestUserViewSet(APITestCase):
-    def test_me_authenticated(self):
+    def test_get_me_authenticated(self):
         user = UserFactory()
         self.client.force_authenticate(user=user)
         response = self.client.get(reverse('user-me'))
@@ -26,7 +27,7 @@ class TestUserViewSet(APITestCase):
         self.assertEqual(response.json(), {'username': user.username,
                                            'color': user.color, 'email': user.email})
 
-    def test_me_unauthenticated(self):
+    def test_get_me_unauthenticated(self):
         response = self.client.get(reverse('user-me'))
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -67,8 +68,23 @@ class TestUserViewSet(APITestCase):
         self.assertEqual(response.json(), {'color': ['This field is required.'],
                                            'password': ['This field is required.'],
                                            'username': ['This field is required.']})
+    def test_delete_me_authenticated(self):
+        user = UserFactory()
+        self.client.force_authenticate(user=user)
+        self.assertEqual(User.objects.count(), 1)
+        response = self.client.delete(reverse('user-me'))
 
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(response.content, b'')
+        self.assertEqual(User.objects.count(), 0)
 
+    def test_delete_me_unauthenticated(self):
+        response = self.client.delete(reverse('user-me'))
+
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
+    
+    
 class TestAuthObtainJWTView(APITestCase):
     def test_login_with_credentials(self):
         user = UserFactory()
