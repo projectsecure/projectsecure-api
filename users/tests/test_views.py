@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from rest_framework.status import HTTP_204_NO_CONTENT, HTTP_200_OK, HTTP_401_UNAUTHORIZED, HTTP_400_BAD_REQUEST
 from users.tests.factories import UserFactory, DEFAULT_PASSWORD
 from users.models import User
+from users.serializers import UserSerializer
 import datetime
 
 
@@ -23,9 +24,10 @@ class TestUserViewSet(APITestCase):
         self.client.force_authenticate(user=user)
         response = self.client.get(reverse('user-me'))
 
+        user = User.objects.get(id=user.id)
+        data = UserSerializer(user).data
         self.assertEqual(response.status_code, HTTP_200_OK)
-        self.assertEqual(response.json(), {'username': user.username,
-                                           'color': user.color, 'email': user.email})
+        self.assertEqual(response.json(), data)
 
     def test_get_me_unauthenticated(self):
         response = self.client.get(reverse('user-me'))
@@ -86,6 +88,37 @@ class TestUserViewSet(APITestCase):
 
         self.assertEqual(response.status_code, HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json(), {'detail': 'Authentication credentials were not provided.'})
+
+    def test_patch_me_authenticated(self):
+        user = UserFactory()
+        new_data = {
+            'username': 'anewuser',
+            'password': '1randompassword',
+            'email': 'anewuser@test.de',
+            'color': '#ffffff'
+        }
+        self.client.force_authenticate(user=user)
+        response = self.client.patch(reverse('user-me'), data=new_data)
+
+        user = User.objects.get(id=user.id)
+        data = UserSerializer(user).data
+        self.assertEqual(response.status_code, HTTP_200_OK)
+        self.assertEqual(response.json(), data)
+
+        new_data.pop('password') # Pop password of easy comparison
+        self.assertEqual(response.json(), new_data)
+
+        # Test that update is reflected in model
+        self.assertEqual(user.username, new_data['username'])
+        self.assertEqual(user.email, new_data['email'])
+        self.assertEqual(user.color, new_data['color'])
+
+    def test_patch_me_unauthenticated(self):
+        response = self.client.patch(reverse('user-me'), {'username': 'test'})
+
+        self.assertEqual(response.status_code, HTTP_401_UNAUTHORIZED)
+        self.assertEqual(response.json(),
+                         {'detail': 'Authentication credentials were not provided.'})
     
     
 class TestAuthObtainJWTView(APITestCase):
