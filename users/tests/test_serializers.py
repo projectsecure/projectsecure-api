@@ -24,7 +24,8 @@ class TestUserSerializer(TestCase):
         """
         Tests that a user gets created when the serializer is initialized with valid data
         """
-        data = {'username': 'ausername2348353', 'password': 'fsfsanbshfbsjkf', 'color': '#ffffff'}
+        data = {'username': 'ausername2348353', 'password': 'fsfsanbshfbsjkf', 'color': '#ffffff',
+                'email': 'test@example.com'}
         serializer = UserSerializer(data=data)
         self.assertTrue(serializer.is_valid())
         serializer.save()

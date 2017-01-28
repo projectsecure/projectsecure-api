@@ -7,6 +7,8 @@ django-extensions==1.7.4
 drf-extensions==0.3.1
 requests==2.11.1
 django-polymorphic
+packaging
+appdirs
 
 # Testing
 pytest-django==3.0.0

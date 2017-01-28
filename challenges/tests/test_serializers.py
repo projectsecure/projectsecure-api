@@ -13,6 +13,7 @@ class TestChallengeSerializers(TestCase):
 
             self.assertEqual(data.pop('title'), challenge.ChallengeMeta.title)
             self.assertEqual(data.pop('description'), challenge.ChallengeMeta.description)
+            self.assertEqual(data.pop('summary'), challenge.ChallengeMeta.summary)
             self.assertEqual(data.pop('status'), challenge.status)
             self.assertEqual(data.pop('message'), challenge.message)
             self.assertEqual(data.pop('slug'), challenge_type[0],
