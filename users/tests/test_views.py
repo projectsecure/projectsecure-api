@@ -58,7 +58,8 @@ class TestUserViewSet(APITestCase):
 
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(),
-                         {'username': ['A user with that username already exists.']})
+                         {'username': ['A user with that username already exists.'],
+                          'email': ['user with this email address already exists.']})
 
     def test_register_user_with_missing_data(self):
         data = {}
@@ -67,7 +68,9 @@ class TestUserViewSet(APITestCase):
         self.assertEqual(response.status_code, HTTP_400_BAD_REQUEST)
         self.assertEqual(response.json(), {'color': ['This field is required.'],
                                            'password': ['This field is required.'],
-                                           'username': ['This field is required.']})
+                                           'username': ['This field is required.'],
+                                           'email': ['This field is required.']})
+
     def test_delete_me_authenticated(self):
         user = UserFactory()
         self.client.force_authenticate(user=user)

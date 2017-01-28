@@ -12,7 +12,7 @@ class UserFactory(factory.DjangoModelFactory):
 
     username = factory.Sequence(lambda n: 'username_{0}'.format(n))
     color = fake.hex_color()
-    email = fake.email()
+    email = factory.Sequence(lambda n: 'test_{0}@example.com'.format(n))
     is_staff = False
     is_active = True
     date_joined = fake.date_time_this_year(before_now=True, after_now=False, tzinfo=None)
