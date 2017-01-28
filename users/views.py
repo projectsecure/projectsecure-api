@@ -13,7 +13,7 @@ class UserViewSet(viewsets.GenericViewSet):
 
     @list_route(methods=['get', 'delete'])
     def me(self, request):
-        if request.method == 'delete':
+        if request.method == 'DELETE':
             request.user.delete()
             return Response(status=HTTP_204_NO_CONTENT)
         else:
