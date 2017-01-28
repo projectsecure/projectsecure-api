@@ -11,11 +11,16 @@ class UserViewSet(viewsets.GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    @list_route(methods=['get', 'delete'])
+    @list_route(methods=['get', 'delete', 'patch'])
     def me(self, request):
         if request.method == 'DELETE':
             request.user.delete()
             return Response(status=HTTP_204_NO_CONTENT)
+        elif request.method == 'PATCH':
+            serializer = UserSerializer(instance=request.user, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
         else:
             serializer = UserSerializer(instance=request.user)
             return Response(serializer.data)
