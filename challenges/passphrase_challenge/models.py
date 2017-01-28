@@ -46,7 +46,7 @@ class PassphraseChallenge(Challenge):
         if self.check_passphrase_status == Challenge.COMPLETED:
             return
 
-        input = request.data.get('input')
+        input = request.data.get('input') or ''
 
         rules = [
             lambda s: any(x.isupper() for x in s),  # must have at least one uppercase
