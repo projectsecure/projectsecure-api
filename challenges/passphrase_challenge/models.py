@@ -1,6 +1,7 @@
 from challenges.models import Challenge, TextStep, InputStep, register_step_handler
 from django.db import models
 
+
 class PassphraseChallenge(Challenge):
     class ChallengeMeta:
         title = 'Passphrase statt Passwort'
