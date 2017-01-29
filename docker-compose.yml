@@ -12,13 +12,11 @@ services:
       - projectsecure
     volumes:
       - .:/code
-    ports:
-      - "8000:8000"
     depends_on:
       - postgres
     links:
       - postgres
-    command: python manage.py runserver 0.0.0.0:8000
+    command: gunicorn --bind 0.0.0.0:8000  projectsecure.wsgi
     environment:
       DJANGO_SETTINGS_MODULE: projectsecure.settings
       JWT_SECRET_KEY: "A random key"
@@ -26,5 +24,18 @@ services:
       DEBUG: "TRUE"
       HOST: '*'
 
+  nginx:
+    build: ./deployment
+    depends_on:
+      - postgres
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      NGINX_HOST: 192.168.99.100
+    networks:
+      - projectsecure
+    command: /bin/bash -c "envsubst '$$NGINX_HOST' < /setup/nginx.conf > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
 networks:
   projectsecure:
