@@ -14,8 +14,8 @@ class IdentityLeakCheckerChallenge(Challenge):
         wurde und missbraucht werden könnte."""
         steps = [
             ('introduction',
-             TextStep(title='sdf', text='Starte die Challenge mit einem Klick auf den Button')),
-            ('check_email', InputStep(input_title='Enter email', button_title='Check', title=''))
+             TextStep(title='Einleitung', text='Starte die Challenge mit einem Klick auf den Button')),
+            ('check_email', InputStep(input_title='Email eingeben', button_title='Check ausführen', title=''))
         ]
 
     check_email_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
