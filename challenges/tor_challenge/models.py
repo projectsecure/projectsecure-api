@@ -15,7 +15,7 @@ class TorChallenge(Challenge):
         steps = [
             ('introduction',
              TextStep(title='', text='Starte die Challenge mit einem Klick auf den Button')),
-            ('check_tor_connection', ButtonStep(button_title='Check tor connection', title=''))
+            ('check_tor_connection', ButtonStep(button_title='Prüfe Verbindung zu Tor', title=''))
         ]
 
     check_tor_connection_status = models.CharField(max_length=11, choices=Challenge.STATUS_CHOICES,
