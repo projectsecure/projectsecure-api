@@ -10,10 +10,8 @@ class TorChallenge(Challenge):
         description = """Mit Tor kannst du anonym im Internet surfen ohne das deine Aktivität für andere sichtbar ist.
         Das funktioniert indem deine Verbindung über mehrere Computer geleitet wird die alle nur den direkten Vorgänger und direkten Nachfolger kennen.
         Somit weiß der Server, der deine Anfrage erhält, nicht von wem die Anfrage kommt.
-        
         Doch vorsichtig! Du musst auch deine Surfgewohnheiten anpassen und darauf achten keine persönlichen Daten anzugeben,
         damit dich die Anonymität, die dir Tor bietet, schützt.
-        
         Informiere dich hier, wie du den Tor Browser installieren kannst: https://www.torproject.org/download/download-easy.html.en"""
         steps = [
             ('introduction',
