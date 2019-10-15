@@ -5,7 +5,7 @@ psycopg2==2.6.2
 djangorestframework-jwt==1.8.0
 django-extensions==1.7.4
 drf-extensions==0.3.1
-requests==2.11.1
+requests==2.20.0
 django-polymorphic==1.0.2
 packaging==16.8
 appdirs==1.4.0
